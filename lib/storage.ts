@@ -16,65 +16,75 @@ const DEFAULT_STATE: State = {
   targets: DEFAULT_TARGETS,
 };
 
-function wrapGet<T>(key?: string): Promise<T> {
-  return new Promise((resolve) => {
-    browser.storage.local.get(key || STORAGE_KEY).then((res: Record<string, any>) => {
-      resolve(res[key || STORAGE_KEY]);
-    });
-  });
+async function getStorageItem<T>(key: string): Promise<T | undefined> {
+  const res = await browser.storage.local.get(key);
+  return res[key];
 }
 
-function wrapSet(obj: any): Promise<void> {
-  return new Promise((resolve) => {
-    browser.storage.local.set(obj).then(() => resolve());
-  });
+async function setStorageItem(key: string, value: any): Promise<void> {
+  await browser.storage.local.set({ [key]: value });
 }
 
 export async function getState(): Promise<State> {
-  const state = (await wrapGet<State>()) || DEFAULT_STATE;
-  // If date mismatches, we should adapt (but do not mutate persistent state here)
+  const stored = await getStorageItem<State>(STORAGE_KEY);
+  if (!stored) return { ...DEFAULT_STATE };
+
+  // Merge with default to ensure structure
+  const state = { ...DEFAULT_STATE, ...stored };
+
+  // Ensure daily object exists
   if (!state.daily || !state.daily.date) {
     state.daily = { ...DEFAULT_STATE.daily };
   }
+  // Ensure targets exist
+  if (!state.targets) {
+    state.targets = DEFAULT_TARGETS;
+  }
+
   return state;
 }
 
 export async function setState(state: State): Promise<void> {
-  await wrapSet({ [STORAGE_KEY]: state });
+  await setStorageItem(STORAGE_KEY, state);
   try {
-    browser.runtime.sendMessage({ type: "stateChanged", state });
+    browser.runtime.sendMessage({ type: "stateChanged", state }).catch(() => {});
   } catch (e) {
-    // ignore
+    // ignore errors if runtime is not available
   }
 }
 
 export async function ensureStateInitialized(): Promise<void> {
   const state = await getState();
-  // If missing or malformed, set defaults
-  if (!state || !state.daily || !state.daily.date) {
-    await setState(DEFAULT_STATE);
-    return;
+  // getState already merges with defaults, so we just save it to persist any missing fields
+  await setState(state);
+}
+
+/**
+ * Checks if the state's date matches the target date.
+ * If not, moves current daily counts to history and resets daily counts for the new date.
+ * Returns true if rollover occurred.
+ */
+function rolloverDateIfNeeded(state: State, targetDate: string): boolean {
+  if (state.daily.date !== targetDate) {
+    state.history = {
+      ...state.history,
+      [state.daily.date]: { ...state.daily },
+    };
+    state.daily = { date: targetDate, tweets: 0, replies: 0 };
+    return true;
   }
-  // Ensure targets exist
-  if (!state.targets) {
-    state.targets = DEFAULT_TARGETS;
-    await setState(state);
-  }
+  return false;
 }
 
 export async function increment(type: CounterType): Promise<void> {
   const state = await getState();
   const today = dayjs().format("YYYY-MM-DD");
-  if (state.daily.date !== today) {
-    // If the stored day is not today, roll it into history and reset
-    state.history = {
-      ...state.history,
-      [state.daily.date]: { tweets: state.daily.tweets, replies: state.daily.replies },
-    };
-    state.daily = { date: today, tweets: 0, replies: 0 };
-  }
+
+  rolloverDateIfNeeded(state, today);
+
   if (type === "tweet") state.daily.tweets += 1;
   else state.daily.replies += 1;
+
   await setState(state);
 }
 
@@ -87,15 +97,15 @@ export async function setTargets(tweets: number, replies: number): Promise<void>
 export async function resetForDate(date?: string): Promise<void> {
   const state = await getState();
   const newDate = date || dayjs().format("YYYY-MM-DD");
-  // if state.daily is set and represents a different date, push it into history
-  if (state.daily && state.daily.date && state.daily.date !== newDate) {
-    state.history = {
-      ...state.history,
-      [state.daily.date]: { tweets: state.daily.tweets, replies: state.daily.replies },
-    };
+
+  const rolledOver = rolloverDateIfNeeded(state, newDate);
+
+  if (!rolledOver) {
+    // If we are on the same date, just reset the counts
+    state.daily.tweets = 0;
+    state.daily.replies = 0;
   }
-  // seed a fresh day with newDate
-  state.daily = { date: newDate, tweets: 0, replies: 0 };
+
   await setState(state);
 }
 
@@ -103,5 +113,5 @@ export async function resetForDate(date?: string): Promise<void> {
 export function millisUntilNextLocalMidnight(): number {
   const now = dayjs();
   const next = now.add(1, "day").startOf("day");
-  return next.valueOf() - now.valueOf();
+  return next.diff(now);
 }

@@ -6,9 +6,14 @@ import type { CounterType } from "./types.ts";
  * Returns 'tweet' if there is no `reply` object, 'reply' if it exists, else 'unknown'.
  */
 export function classifyCreateTweetPayload(payload: any): CounterType | "unknown" {
-  console.log(payload);
   if (!payload || typeof payload !== "object") return "unknown";
-  if (payload.variables?.reply && typeof payload.variables.reply === "object") return "reply";
+
+  // Check for reply structure in variables
+  if (payload.variables?.reply && typeof payload.variables.reply === "object") {
+    return "reply";
+  }
+
+  // Default to tweet if valid payload but no reply indicator
   return "tweet";
 }
 
@@ -16,32 +21,40 @@ export function classifyCreateTweetPayload(payload: any): CounterType | "unknown
  * Try to parse a request body which may be either JSON string or FormData-like object.
  */
 export function parseCreateTweetRequestBody(body: any): any | null {
-  // If body is already an object
   if (!body) return null;
-  if (typeof body === "object") {
-    // if body is a FormData-like map, it will have keys
-    if (body.formData) {
-      // formData is an object whose keys map to arrays
-      // look for a key that contains JSON, attempt to parse
-      const fid = Object.keys(body.formData).find(
-        (k) => k.toLowerCase().includes("variables") || k.toLowerCase().includes("payload")
-      );
-      if (fid) {
-        try {
-          return JSON.parse(body.formData[fid][0]);
-        } catch (e) {
-          return null;
-        }
-      }
-      return null;
-    }
-    // it's already an object representing the payload
-    return body;
-  }
+
+  // Handle string input (JSON)
   if (typeof body === "string") {
     try {
       return JSON.parse(body);
-    } catch (_) {
+    } catch {
+      return null;
+    }
+  }
+
+  // Handle object input
+  if (typeof body === "object") {
+    // Handle FormData structure
+    if (body.formData) {
+      return parseFormData(body.formData);
+    }
+    // Already a parsed object
+    return body;
+  }
+
+  return null;
+}
+
+function parseFormData(formData: Record<string, string[]>): any | null {
+  const key = Object.keys(formData).find((k) => {
+    const lower = k.toLowerCase();
+    return lower.includes("variables") || lower.includes("payload");
+  });
+
+  if (key && formData[key]?.[0]) {
+    try {
+      return JSON.parse(formData[key][0]);
+    } catch {
       return null;
     }
   }
