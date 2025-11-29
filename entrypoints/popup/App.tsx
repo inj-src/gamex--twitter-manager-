@@ -66,6 +66,11 @@ function App() {
           />
         </div>
 
+        <div className="time-stat">
+          <div className="label">Time on X Today</div>
+          <div className="value">{formatTime(state?.daily?.seconds ?? 0)}</div>
+        </div>
+
         <div className="controls">
           <TargetInput
             label="Tweets target"
@@ -88,7 +93,7 @@ function App() {
             {historyDates.map((d) => (
               <li key={d}>
                 <strong>{d}</strong>: {state!.history[d].tweets} tweets, {state!.history[d].replies}{" "}
-                replies
+                replies, {formatTime(state!.history[d].seconds ?? 0)}
               </li>
             ))}
           </ul>
@@ -124,6 +129,15 @@ function TargetInput({
       <input type="number" value={value} onChange={(e) => onChange(Number(e.target.value))} />
     </div>
   );
+}
+
+function formatTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
 }
 
 export default App;

@@ -11,6 +11,7 @@ const DEFAULT_STATE: State = {
     date: dayjs().format("YYYY-MM-DD"),
     tweets: 0,
     replies: 0,
+    seconds: 0,
   },
   history: {},
   targets: DEFAULT_TARGETS,
@@ -70,7 +71,7 @@ function rolloverDateIfNeeded(state: State, targetDate: string): boolean {
       ...state.history,
       [state.daily.date]: { ...state.daily },
     };
-    state.daily = { date: targetDate, tweets: 0, replies: 0 };
+    state.daily = { date: targetDate, tweets: 0, replies: 0, seconds: 0 };
     return true;
   }
   return false;
@@ -85,6 +86,21 @@ export async function increment(type: CounterType): Promise<void> {
   if (type === "tweet") state.daily.tweets += 1;
   else state.daily.replies += 1;
 
+  await setState(state);
+}
+
+export async function addSeconds(seconds: number): Promise<void> {
+  const state = await getState();
+  const today = dayjs().format("YYYY-MM-DD");
+
+  rolloverDateIfNeeded(state, today);
+
+  // Ensure seconds is initialized (for migration)
+  if (typeof state.daily.seconds !== "number") {
+    state.daily.seconds = 0;
+  }
+
+  state.daily.seconds += seconds;
   await setState(state);
 }
 
@@ -104,6 +120,7 @@ export async function resetForDate(date?: string): Promise<void> {
     // If we are on the same date, just reset the counts
     state.daily.tweets = 0;
     state.daily.replies = 0;
+    state.daily.seconds = 0;
   }
 
   await setState(state);

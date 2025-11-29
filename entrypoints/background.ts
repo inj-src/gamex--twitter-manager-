@@ -6,6 +6,7 @@ import {
   resetForDate,
   ensureStateInitialized,
   getState,
+  addSeconds,
 } from "../lib/storage";
 
 // `browser` global type is provided by WXT; remove `any` declarations to use the typed API
@@ -20,6 +21,7 @@ export default defineBackground(() => {
   registerWebRequestListeners();
   registerAlarmListeners();
   registerInstallListeners();
+  registerTimeTracking();
 });
 
 async function initializeState() {
@@ -118,5 +120,32 @@ function registerInstallListeners() {
     });
   } catch (err) {
     // ignore if not available
+  }
+}
+
+function registerTimeTracking() {
+  let intervalId: NodeJS.Timeout | null = null;
+  const CHECK_INTERVAL = 15000; // 15 seconds
+
+  const checkActiveTab = async () => {
+    try {
+      const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+      if (tabs.length === 0) return;
+
+      const activeTab = tabs[0];
+      if (
+        activeTab.url &&
+        (activeTab.url.includes("x.com") || activeTab.url.includes("twitter.com"))
+      ) {
+        await addSeconds(CHECK_INTERVAL / 1000);
+      }
+    } catch (e) {
+      console.error("Error tracking time", e);
+    }
+  };
+
+  // Start tracking immediately
+  if (!intervalId) {
+    intervalId = setInterval(checkActiveTab, CHECK_INTERVAL);
   }
 }
