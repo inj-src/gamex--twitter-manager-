@@ -11,6 +11,7 @@ export interface State {
   daily: DailyCounts;
   history: Record<string, { tweets: number; replies: number; seconds: number }>;
   targets: { tweets: number; replies: number };
+  openRouterApiKey?: string;
 }
 
 export const DEFAULT_TARGETS = { tweets: 5, replies: 50 };

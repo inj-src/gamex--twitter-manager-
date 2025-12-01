@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { getState, setTargets, resetForDate } from "../../lib/storage";
+import { getState, setTargets, resetForDate, setOpenRouterApiKey } from "../../lib/storage";
 import type { State } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { MessageCircle, Twitter, Clock, RotateCcw, History, Target } from "lucid
 function App() {
   const [state, setState] = useState<State | null>(null);
   const [targets, setLocalTargets] = useState({ tweets: 5, replies: 50 });
+  const [apiKey, setApiKey] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
@@ -22,6 +23,7 @@ function App() {
       if (!mounted) return;
       setState(s);
       setLocalTargets(s.targets || { tweets: 5, replies: 50 });
+      setApiKey(s.openRouterApiKey || "");
     };
 
     loadState();
@@ -43,6 +45,11 @@ function App() {
   function onUpdateTargets(newTargets: { tweets: number; replies: number }) {
     setLocalTargets(newTargets);
     setTargets(newTargets.tweets, newTargets.replies);
+  }
+
+  function onUpdateApiKey(newKey: string) {
+    setApiKey(newKey);
+    setOpenRouterApiKey(newKey);
   }
 
   async function onReset() {
@@ -140,6 +147,16 @@ function App() {
                     className="bg-background/50 border-border/50 h-8"
                   />
                 </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-muted-foreground text-xs">OpenRouter API Key</label>
+                <Input
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => onUpdateApiKey(e.target.value)}
+                  className="bg-background/50 border-border/50 h-8"
+                  placeholder="sk-or-..."
+                />
               </div>
               <Button
                 variant="destructive"

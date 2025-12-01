@@ -110,6 +110,12 @@ export async function setTargets(tweets: number, replies: number): Promise<void>
   await setState(state);
 }
 
+export async function setOpenRouterApiKey(apiKey: string): Promise<void> {
+  const state = await getState();
+  state.openRouterApiKey = apiKey;
+  await setState(state);
+}
+
 export async function resetForDate(date?: string): Promise<void> {
   const state = await getState();
   const newDate = date || dayjs().format("YYYY-MM-DD");
