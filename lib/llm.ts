@@ -2,11 +2,12 @@ import { OpenRouter } from "@openrouter/sdk";
 import { ConversationContext } from "./extract";
 import { getState } from "./storage";
 
-const MODEL = "google/gemini-2.0-flash-001"; // Cost-effective and fast
+const DEFAULT_MODEL = "moonshotai/kimi-k2:free"; // Cost-effective and fast
 
 export async function generateReply(context: ConversationContext): Promise<string> {
   const state = await getState();
   const apiKey = state.openRouterApiKey;
+  const model = state.llmModel || DEFAULT_MODEL;
 
   if (!apiKey) {
     throw new Error("OpenRouter API Key not found. Please set it in the extension popup.");
@@ -22,9 +23,10 @@ export async function generateReply(context: ConversationContext): Promise<strin
 
   const prompt = constructPrompt(context);
 
+  
   try {
-    const completion = await openRouter.chat.completions.create({
-      model: MODEL,
+    const completion = await openRouter.chat.send({
+      model: model,
       messages: [
         {
           role: "system",
@@ -37,10 +39,12 @@ export async function generateReply(context: ConversationContext): Promise<strin
         },
       ],
       temperature: 0.7,
-      max_tokens: 150,
+      stream: false,
     });
+    
 
-    return completion.choices[0].message.content?.trim() || "";
+    return completion.choices[0].message.content?.toString().trim() || "";
+
   } catch (error) {
     console.error("Error generating reply:", error);
     throw error;

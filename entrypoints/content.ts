@@ -70,30 +70,27 @@ function injectAIButton(group: HTMLElement) {
       // 1. Extract context
       const context = extractConversationContext();
 
-      console.log({ context });
 
       // 2. Generate reply
-      // const reply = await generateReply(context);
-      // console.log("Generated reply:", reply);
+      const reply = await generateReply(context);
+      console.log("Generated reply:", reply);
 
-      // TODO : Needs to be implemented properly
-      // 3. Open reply box if needed
-      // const replyButton = group.querySelector('[data-testid="reply"]') as HTMLElement;
-      // if (replyButton) {
-      //   replyButton.click();
+      const replyButton = group.querySelector('[data-testid="reply"]') as HTMLElement;
+      if (replyButton) {
+        replyButton.click();
 
-      //   // Wait for modal/input to appear
-      //   await new Promise((resolve) => setTimeout(resolve, 500));
+        // Wait for modal/input to appear
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-      //   // 4. Insert text
-      //   const inputArea = document.querySelector('[data-testid="tweetTextarea_0"]') as HTMLElement;
-      //   if (inputArea) {
-      //     inputArea.focus();
-      //     document.execCommand("insertText", false, reply);
-      //   } else {
-      //     console.error("Could not find tweet input area");
-      //   }
-      // }
+        // 4. Insert text
+        const inputArea = document.querySelector('[data-testid="tweetTextarea_0"]') as HTMLElement;
+        if (inputArea) {
+          inputArea.focus();
+          document.execCommand("insertText", false, reply);
+        } else {
+          console.error("Could not find tweet input area");
+        }
+      }
     } catch (error) {
       console.error("AI Reply failed:", error);
       alert("Failed to generate reply. Please check your API key in the extension popup.");

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { getState, setTargets, resetForDate, setOpenRouterApiKey } from "../../lib/storage";
+import { getState, setTargets, resetForDate, setOpenRouterApiKey, setLlmModel } from "@/lib/storage";
 import type { State } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ function App() {
   const [state, setState] = useState<State | null>(null);
   const [targets, setLocalTargets] = useState({ tweets: 5, replies: 50 });
   const [apiKey, setApiKey] = useState("");
+  const [llmModel, setLlmModelLocal] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
@@ -24,6 +25,7 @@ function App() {
       setState(s);
       setLocalTargets(s.targets || { tweets: 5, replies: 50 });
       setApiKey(s.openRouterApiKey || "");
+      setLlmModelLocal(s.llmModel || "");
     };
 
     loadState();
@@ -50,6 +52,11 @@ function App() {
   function onUpdateApiKey(newKey: string) {
     setApiKey(newKey);
     setOpenRouterApiKey(newKey);
+  }
+
+  function onUpdateLlmModel(newModel: string) {
+    setLlmModelLocal(newModel);
+    setLlmModel(newModel);
   }
 
   async function onReset() {
@@ -156,6 +163,16 @@ function App() {
                   onChange={(e) => onUpdateApiKey(e.target.value)}
                   className="bg-background/50 border-border/50 h-8"
                   placeholder="sk-or-..."
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-muted-foreground text-xs">LLM Model</label>
+                <Input
+                  type="text"
+                  value={llmModel}
+                  onChange={(e) => onUpdateLlmModel(e.target.value)}
+                  className="bg-background/50 border-border/50 h-8"
+                  placeholder="moonshotai/kimi-k2:free"
                 />
               </div>
               <Button

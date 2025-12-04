@@ -1,3 +1,5 @@
+// TODO: The storage module needs refactoring
+
 import dayjs from "dayjs";
 import type { State, DailyCounts, CounterType } from "./types.ts";
 import { DEFAULT_TARGETS } from "./types.ts";
@@ -113,6 +115,12 @@ export async function setTargets(tweets: number, replies: number): Promise<void>
 export async function setOpenRouterApiKey(apiKey: string): Promise<void> {
   const state = await getState();
   state.openRouterApiKey = apiKey;
+  await setState(state);
+}
+
+export async function setLlmModel(llmModel: string): Promise<void> {
+  const state = await getState();
+  state.llmModel = llmModel;
   await setState(state);
 }
 

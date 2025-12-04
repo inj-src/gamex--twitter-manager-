@@ -12,6 +12,7 @@ export interface State {
   history: Record<string, { tweets: number; replies: number; seconds: number }>;
   targets: { tweets: number; replies: number };
   openRouterApiKey?: string;
+  llmModel?: string;
 }
 
 export const DEFAULT_TARGETS = { tweets: 5, replies: 50 };

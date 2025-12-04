@@ -16,7 +16,6 @@ export function extractConversationContext(): ConversationContext {
     alert("Could not find conversation timeline.");
     return { mainTweet: null, replies: [] };
   }
-  console.log({ conversation });
 
   const tweets = Array.from(conversation.querySelectorAll('article[data-testid="tweet"]'));
   if (tweets.length === 0) return { mainTweet: null, replies: [] };
@@ -38,6 +37,8 @@ export function extractConversationContext(): ConversationContext {
 }
 
 function extractTweetData(element: Element): TweetContent | null {
+  // TODO: The tweet data extraction needs to be improved
+  // By using semantic HTML attributes or Twitter's internal data structures if accessible
   const tweetTextElement = element.querySelector('[data-testid="tweetText"]');
   const text = tweetTextElement ? (tweetTextElement as HTMLElement).innerText : "";
 
