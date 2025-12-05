@@ -94,7 +94,7 @@ function App() {
           variant="ghost"
           size="icon"
           onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-          className="hover:bg-accent/50 hover:text-primary transition-colors"
+          className="hover:bg-accent hover:text-primary transition-colors"
         >
           <Target className="w-4 h-4" />
         </Button>
@@ -120,7 +120,7 @@ function App() {
         </div>
 
         {/* Time Stat */}
-        <Card className="bg-card/50 border-border/50">
+        <Card className="bg-card border-border">
           <CardContent className="flex justify-between items-center p-4">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Clock className="w-4 h-4" />
@@ -134,7 +134,7 @@ function App() {
 
         {/* Settings / Controls */}
         {isSettingsOpen && (
-          <Card className="bg-secondary/20 slide-in-from-top-2 border-border/50 animate-in duration-200 fade-in">
+          <Card className="bg-secondary slide-in-from-top-2 border-border animate-in duration-200 fade-in">
             <CardHeader className="pb-2">
               <CardTitle className="font-medium text-muted-foreground text-sm">Targets</CardTitle>
             </CardHeader>
@@ -148,7 +148,7 @@ function App() {
                     onChange={(e) =>
                       onUpdateTargets({ ...targets, tweets: Number(e.target.value) })
                     }
-                    className="bg-background/50 border-border/50 h-8"
+                    className="bg-background border-border h-8"
                   />
                 </div>
                 <div className="space-y-1">
@@ -159,7 +159,7 @@ function App() {
                     onChange={(e) =>
                       onUpdateTargets({ ...targets, replies: Number(e.target.value) })
                     }
-                    className="bg-background/50 border-border/50 h-8"
+                    className="bg-background border-border h-8"
                   />
                 </div>
               </div>
@@ -169,7 +169,7 @@ function App() {
                   type="password"
                   value={apiKey}
                   onChange={(e) => onUpdateApiKey(e.target.value)}
-                  className="bg-background/50 border-border/50 h-8"
+                  className="bg-background border-border h-8"
                   placeholder="sk-or-..."
                 />
               </div>
@@ -179,7 +179,7 @@ function App() {
                   type="text"
                   value={llmModel}
                   onChange={(e) => onUpdateLlmModel(e.target.value)}
-                  className="bg-background/50 border-border/50 h-8"
+                  className="bg-background border-border h-8"
                   placeholder="moonshotai/kimi-k2:free"
                 />
               </div>
@@ -203,7 +203,7 @@ function App() {
           </Card>
         )}
 
-        <Separator className="bg-border/50" />
+        <Separator className="bg-border" />
 
         {/* History */}
         <div className="space-y-3">
@@ -218,7 +218,7 @@ function App() {
               historyDates.map((d) => (
                 <div
                   key={d}
-                  className="flex justify-between items-center hover:bg-accent/30 p-2 border border-transparent hover:border-border/30 rounded-md text-sm transition-colors"
+                  className="flex justify-between items-center hover:bg-accent p-2 border border-transparent hover:border-border rounded-md text-sm transition-colors"
                 >
                   <span className="font-mono text-muted-foreground text-xs">{d}</span>
                   <div className="flex items-center gap-3">

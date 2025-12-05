@@ -5,24 +5,24 @@
 
 :root {
   /* Obsidian Dark Theme by default */
-  --background: oklch(0.05 0 0);
+  --background: oklch(0.02 0 0);
   --foreground: oklch(0.98 0 0);
-  --card: oklch(0.08 0 0);
+  --card: oklch(0.12 0 0);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.08 0 0);
+  --popover: oklch(0.12 0 0);
   --popover-foreground: oklch(0.98 0 0);
 
   /* Neon Accents */
   --primary: oklch(0.75 0.18 180); /* Cyan Neon */
   --primary-foreground: oklch(0.05 0 0);
 
-  --secondary: oklch(0.15 0 0);
+  --secondary: oklch(0.18 0 0);
   --secondary-foreground: oklch(0.98 0 0);
 
-  --muted: oklch(0.15 0 0);
+  --muted: oklch(0.18 0 0);
   --muted-foreground: oklch(0.6 0 0);
 
-  --accent: oklch(0.15 0 0);
+  --accent: oklch(0.18 0 0);
   --accent-foreground: oklch(0.98 0 0);
 
   --destructive: oklch(0.6 0.25 25);
@@ -53,19 +53,19 @@
 
 .dark {
   /* Same as root for this specific "dark-mode dashboard" request */
-  --background: oklch(0.05 0 0);
+  --background: oklch(0.02 0 0);
   --foreground: oklch(0.98 0 0);
-  --card: oklch(0.08 0 0);
+  --card: oklch(0.12 0 0);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.08 0 0);
+  --popover: oklch(0.12 0 0);
   --popover-foreground: oklch(0.98 0 0);
   --primary: oklch(0.75 0.18 180);
   --primary-foreground: oklch(0.05 0 0);
-  --secondary: oklch(0.15 0 0);
+  --secondary: oklch(0.18 0 0);
   --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.15 0 0);
+  --muted: oklch(0.18 0 0);
   --muted-foreground: oklch(0.6 0 0);
-  --accent: oklch(0.15 0 0);
+  --accent: oklch(0.18 0 0);
   --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.6 0.25 25);
   --destructive-foreground: oklch(0.98 0 0);
