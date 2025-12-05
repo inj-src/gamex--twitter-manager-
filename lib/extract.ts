@@ -8,6 +8,7 @@ export interface TweetContent {
 export interface ConversationContext {
   mainTweet: TweetContent | null;
   replies: TweetContent[];
+  userInstructions?: string;
 }
 
 export function extractConversationContext(): ConversationContext {
@@ -30,9 +31,14 @@ export function extractConversationContext(): ConversationContext {
     .map(extractTweetData)
     .filter((t): t is TweetContent => t !== null);
 
+  // Extract user instructions from the inline reply input
+  const userInstructionsElement = document.querySelector('div[data-testid="inline_reply_offscreen"] span[data-text="true"]');
+  const userInstructions = userInstructionsElement ? (userInstructionsElement as HTMLElement).innerText.trim() : undefined;
+
   return {
     mainTweet,
     replies,
+    userInstructions,
   };
 }
 

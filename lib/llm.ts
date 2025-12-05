@@ -43,7 +43,7 @@ export async function generateReply(context: ConversationContext): Promise<strin
       messages: [
         {
           role: "system",
-          content: generateSystemPrompt(),
+          content: generateSystemPrompt(context.userInstructions),
         },
         {
           role: "user",
