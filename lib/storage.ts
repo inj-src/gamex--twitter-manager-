@@ -17,6 +17,7 @@ const DEFAULT_STATE: State = {
   },
   history: {},
   targets: DEFAULT_TARGETS,
+  useImageUnderstanding: false,
 };
 
 async function getStorageItem<T>(key: string): Promise<T | undefined> {
@@ -137,6 +138,12 @@ export async function resetForDate(date?: string): Promise<void> {
     state.daily.seconds = 0;
   }
 
+  await setState(state);
+}
+
+export async function setUseImageUnderstanding(useImageUnderstanding: boolean): Promise<void> {
+  const state = await getState();
+  state.useImageUnderstanding = useImageUnderstanding;
   await setState(state);
 }
 

@@ -13,6 +13,7 @@ export interface State {
   targets: { tweets: number; replies: number };
   openRouterApiKey?: string;
   llmModel?: string;
+  useImageUnderstanding: boolean;
 }
 
 export const DEFAULT_TARGETS = { tweets: 5, replies: 50 };

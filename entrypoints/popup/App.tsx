@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { getState, setTargets, resetForDate, setOpenRouterApiKey, setLlmModel } from "@/lib/storage";
+import { getState, setTargets, resetForDate, setOpenRouterApiKey, setLlmModel, setUseImageUnderstanding } from "@/lib/storage";
 import type { State } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { MessageCircle, Twitter, Clock, RotateCcw, History, Target } from "lucide-react";
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
   const [apiKey, setApiKey] = useState("");
   const [llmModel, setLlmModelLocal] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [useImageUnderstanding, setUseImageUnderstandingLocal] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -26,6 +28,7 @@ function App() {
       setLocalTargets(s.targets || { tweets: 5, replies: 50 });
       setApiKey(s.openRouterApiKey || "");
       setLlmModelLocal(s.llmModel || "");
+      setUseImageUnderstandingLocal(s.useImageUnderstanding || false);
     };
 
     loadState();
@@ -57,6 +60,11 @@ function App() {
   function onUpdateLlmModel(newModel: string) {
     setLlmModelLocal(newModel);
     setLlmModel(newModel);
+  }
+
+  function onUpdateUseImageUnderstanding(enabled: boolean) {
+    setUseImageUnderstandingLocal(enabled);
+    setUseImageUnderstanding(enabled);
   }
 
   async function onReset() {
@@ -173,6 +181,13 @@ function App() {
                   onChange={(e) => onUpdateLlmModel(e.target.value)}
                   className="bg-background/50 border-border/50 h-8"
                   placeholder="moonshotai/kimi-k2:free"
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <label className="text-muted-foreground text-xs">Image Understanding</label>
+                <Switch
+                  checked={useImageUnderstanding}
+                  onCheckedChange={onUpdateUseImageUnderstanding}
                 />
               </div>
               <Button
