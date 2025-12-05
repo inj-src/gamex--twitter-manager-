@@ -90,11 +90,13 @@ export async function getImageDescription(imageUrls: string[]): Promise<string> 
   imageUrls.forEach((imageUrl) => {
     content.push({
       type: "image_url",
-      image_url: {
+      imageUrl: {
         url: imageUrl,
       },
     });
   });
+
+  console.log('Getting image description with content:', content);
 
   try {
     const completion = await openRouter.chat.send({

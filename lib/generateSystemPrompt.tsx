@@ -71,7 +71,7 @@ export function generateSystemPrompt(): string {
       4.  **Final Polish:** Refine the reply to match the "Good Examples" diction and brevity.
 
       Output Format
-      Provide only the reply as the output
+      Provide only the reply as the output, don't wrap the output in quotation marks or any additional text.
 
       Examples
       **Input Tweet:**
