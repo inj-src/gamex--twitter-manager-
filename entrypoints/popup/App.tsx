@@ -126,7 +126,7 @@ function App() {
               <Clock className="w-4 h-4" />
               <span className="font-medium text-sm">Time on X</span>
             </div>
-            <div className="font-mono font-bold text-primary text-lg neon-text">
+            <div className="font-mono font-bold text-primary text-lg">
               {formatTime(state.daily.seconds)}
             </div>
           </CardContent>

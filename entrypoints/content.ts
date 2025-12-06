@@ -75,21 +75,22 @@ function injectAIButton(group: HTMLElement) {
       const reply = await generateReply(context);
       console.log("Generated reply:", reply);
 
-      const replyButton = group.querySelector('[data-testid="reply"]') as HTMLElement;
-      if (replyButton) {
-        replyButton.click();
+      const replyContainer = document.querySelector('div[data-testid="inline_reply_offscreen"] .DraftEditor-root') as HTMLElement; 
+      
+      if (replyContainer) {
+        replyContainer.click();
 
         // Wait for modal/input to appear
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // 4. Insert text
-        const inputArea = document.querySelector('[data-testid="tweetTextarea_0"]') as HTMLElement;
-        if (inputArea) {
-          inputArea.focus();
+        // const inputArea = document.querySelector('div[data-testid="inline_reply_offscreen"] span[data-text="true"]') as HTMLElement;
+        // if (inputArea) {
+          // replyContainer.focus();
           document.execCommand("insertText", false, reply);
+        // } else {
+          // }
         } else {
-          console.error("Could not find tweet input area");
-        }
+        console.error("Could not find tweet input area");
       }
     } catch (error) {
       console.error("AI Reply failed:", error);
