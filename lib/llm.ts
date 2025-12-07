@@ -1,4 +1,5 @@
-import { OpenRouter } from "@openrouter/sdk";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { generateText } from "ai";
 import { ConversationContext } from "./extract";
 import { getState } from "./storage";
 import { generateSystemPrompt } from "./generateSystemPrompt";
@@ -9,7 +10,7 @@ const VISION_MODEL = "nvidia/nemotron-nano-12b-v2-vl:free";
 export async function generateReply(context: ConversationContext): Promise<string> {
   const state = await getState();
   const apiKey = state.openRouterApiKey;
-  const model = state.llmModel || DEFAULT_MODEL;
+  const modelName = state.llmModel || DEFAULT_MODEL;
 
   if (!apiKey) {
     throw new Error("OpenRouter API Key not found. Please set it in the extension popup.");
@@ -25,21 +26,20 @@ export async function generateReply(context: ConversationContext): Promise<strin
       imageDescription = await getImageDescription(context.mainTweet.images);
     } catch (error) {
       console.error("Failed to get image description, proceeding without it.", error);
-      // Optionally, you could re-throw the error or handle it as needed
     }
   }
 
-  const openRouter = new OpenRouter({
+  const openRouter = createOpenRouter({
     apiKey: apiKey,
   });
 
   const prompt = constructPrompt(context, imageDescription);
 
-  console.log('Generating reply with prompt:', prompt);
-  
+  console.log("Generating reply with prompt:", prompt);
+
   try {
-    const completion = await openRouter.chat.send({
-      model: model,
+    const { text } = await generateText({
+      model: openRouter(modelName),
       messages: [
         {
           role: "system",
@@ -51,12 +51,9 @@ export async function generateReply(context: ConversationContext): Promise<strin
         },
       ],
       temperature: 0.7,
-      stream: false,
     });
-    
 
-    return completion.choices[0].message.content?.toString().trim() || "";
-
+    return text.trim();
   } catch (error) {
     console.error("Error generating reply:", error);
     throw error;
@@ -75,7 +72,7 @@ export async function getImageDescription(imageUrls: string[]): Promise<string> 
     return "";
   }
 
-  const openRouter = new OpenRouter({
+  const openRouter = createOpenRouter({
     apiKey: apiKey,
   });
 
@@ -86,21 +83,18 @@ export async function getImageDescription(imageUrls: string[]): Promise<string> 
     },
   ];
 
-  //TODO: This prompt generation might not output as expected, needs testing.
   imageUrls.forEach((imageUrl) => {
     content.push({
-      type: "image_url",
-      imageUrl: {
-        url: imageUrl,
-      },
+      type: "image",
+      image: imageUrl,
     });
   });
 
-  console.log('Getting image description with content:', content);
+  console.log("Getting image description with content:", content);
 
   try {
-    const completion = await openRouter.chat.send({
-      model: VISION_MODEL,
+    const { text } = await generateText({
+      model: openRouter(VISION_MODEL),
       messages: [
         {
           role: "user",
@@ -108,11 +102,9 @@ export async function getImageDescription(imageUrls: string[]): Promise<string> 
         },
       ],
       temperature: 0.5,
-      stream: false,
     });
 
-    return completion.choices[0].message.content?.toString().trim() || "";
-
+    return text.trim();
   } catch (error) {
     console.error("Error getting image description:", error);
     throw error;
@@ -125,10 +117,10 @@ function constructPrompt(context: ConversationContext, imageDescription: string 
   if (context.mainTweet?.images.length) {
     prompt += `[Attached Images: ${context.mainTweet.images.length}]\n`;
   }
-  
+
   if (imageDescription) {
     prompt += `[Image Description: ${imageDescription}]\n`;
-  } 
+  }
 
   if (context.replies.length > 0) {
     prompt += "\nExisting Replies:\n";

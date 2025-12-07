@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { classifyCreateTweetPayload, parseCreateTweetRequestBody } from "../lib/tweetClassifier";
+import { classifyCreateTweetPayload, parseCreateTweetRequestBody } from "@/lib/tweetClassifier";
 import {
   increment,
   millisUntilNextLocalMidnight,
@@ -7,7 +7,7 @@ import {
   ensureStateInitialized,
   getState,
   addSeconds,
-} from "../lib/storage";
+} from "@/lib/storage";
 
 // `browser` global type is provided by WXT; remove `any` declarations to use the typed API
 
