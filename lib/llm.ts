@@ -1,11 +1,12 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { generateText, UserContent } from "ai";
-import { streamText } from "ai";
+// import { streamText } from "ai";
 
 import { searchMemoriesTool } from "@supermemory/tools/ai-sdk";
 import { ConversationContext } from "./extract";
 import { getState } from "./storage";
 import { generateSystemPrompt } from "./generateSystemPrompt";
+import { constructPrompt } from "./constructPrompt";
 
 const DEFAULT_MODEL = "moonshotai/kimi-k2:free"; // Cost-effective and fast
 const VISION_MODEL = "nvidia/nemotron-nano-12b-v2-vl:free";
@@ -144,26 +145,4 @@ export async function getImageDescription(imageUrls: string[]): Promise<string> 
     console.error("Error getting image description:", error);
     throw error;
   }
-}
-
-function constructPrompt(context: ConversationContext, imageDescription: string = ""): string {
-  let prompt = `Main Tweet by ${context.mainTweet?.authorName} (@${context.mainTweet?.authorHandle}):\n"${context.mainTweet?.text}"\n`;
-
-  if (context.mainTweet?.images.length) {
-    prompt += `[Attached Images: ${context.mainTweet.images.length}]\n`;
-  }
-
-  if (imageDescription) {
-    prompt += `[Image Description: ${imageDescription}]\n`;
-  }
-
-  if (context.replies.length > 0) {
-    prompt += "\nExisting Replies:\n";
-    context.replies.forEach((reply) => {
-      prompt += `- ${reply.authorName} (${reply.authorHandle}): "${reply.text}"\n`;
-    });
-  }
-
-  prompt += "\nGenerate a reply to the main tweet.";
-  return prompt;
 }

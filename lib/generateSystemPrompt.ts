@@ -23,9 +23,9 @@ export function generateSystemPrompt(userInstructions?: string, useMemory?: bool
       * **Content:** Generic yet piercing. Avoid specific fluff; focus on the underlying principle or triggering a reaction.
       * **Context Usage:** Read the Existing Replies to ensure you do *not* copy or rephrase them. You must offer a unique angle or extend the vision of the most controversial take.
 
-      ${userInstructionsSection}
+      ${userInstructionsSection || ""}
    
-      ${memorySection}
+      ${memorySection || ""}
    
       Steps to achive High quality reply
       - **Analyze the Tweet:** Identify the core topic and the potential emotional triggers.
@@ -53,6 +53,7 @@ export function generateSystemPrompt(userInstructions?: string, useMemory?: bool
       * Do not use hashtags.
       * Focus on high-status signaling or controversial wisdom.`;
 
+  console.log(basePrompt);
   return basePrompt;
 }
 
