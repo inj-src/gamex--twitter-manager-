@@ -14,6 +14,9 @@ export interface State {
   openRouterApiKey?: string;
   llmModel?: string;
   useImageUnderstanding: boolean;
+  memoryApiKey?: string;
+  memoryProjectId?: string;
+  useMemory: boolean;
 }
 
 export const DEFAULT_TARGETS = { tweets: 5, replies: 50 };

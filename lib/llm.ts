@@ -1,5 +1,8 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { generateText } from "ai";
+import { generateText, UserContent } from "ai";
+import { streamText } from "ai";
+
+import { searchMemoriesTool } from "@supermemory/tools/ai-sdk";
 import { ConversationContext } from "./extract";
 import { getState } from "./storage";
 import { generateSystemPrompt } from "./generateSystemPrompt";
@@ -11,6 +14,9 @@ export async function generateReply(context: ConversationContext): Promise<strin
   const state = await getState();
   const apiKey = state.openRouterApiKey;
   const modelName = state.llmModel || DEFAULT_MODEL;
+  const useMemory = state.useMemory;
+  const memoryApiKey = state.memoryApiKey;
+  const memoryProjectId = state.memoryProjectId;
 
   if (!apiKey) {
     throw new Error("OpenRouter API Key not found. Please set it in the extension popup.");
@@ -38,20 +44,49 @@ export async function generateReply(context: ConversationContext): Promise<strin
   console.log("Generating reply with prompt:", prompt);
 
   try {
-    const { text } = await generateText({
-      model: openRouter(modelName),
-      messages: [
-        {
-          role: "system",
-          content: generateSystemPrompt(context.userInstructions),
+    const systemContent = generateSystemPrompt(context.userInstructions, useMemory);
+    let text: string;
+
+    if (useMemory && memoryApiKey) {
+      const result = await generateText({
+        model: openRouter(modelName),
+        messages: [
+          {
+            role: "system",
+            content: systemContent,
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        tools: {
+          searchMemories: searchMemoriesTool(
+            memoryApiKey,
+            memoryProjectId ? { projectId: memoryProjectId } : undefined
+          ),
         },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-    });
+        // maxSteps: 2,
+        temperature: 0.7,
+      });
+      text = result.text;
+    } else {
+      const result = await generateText({
+        model: openRouter(modelName),
+        messages: [
+          {
+            role: "system",
+            content: systemContent,
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.7,
+      });
+      text = result.text;
+    }
 
     return text.trim();
   } catch (error) {
@@ -76,7 +111,7 @@ export async function getImageDescription(imageUrls: string[]): Promise<string> 
     apiKey: apiKey,
   });
 
-  const content: any[] = [
+  const content: UserContent = [
     {
       type: "text",
       text: "Describe the visual content and meaning of this image in a concise way.",
@@ -98,7 +133,7 @@ export async function getImageDescription(imageUrls: string[]): Promise<string> 
       messages: [
         {
           role: "user",
-          content: content,
+          content,
         },
       ],
       temperature: 0.5,
@@ -125,7 +160,7 @@ function constructPrompt(context: ConversationContext, imageDescription: string 
   if (context.replies.length > 0) {
     prompt += "\nExisting Replies:\n";
     context.replies.forEach((reply) => {
-      prompt += `- ${reply.authorName} (@${reply.authorHandle}): "${reply.text}"\n`;
+      prompt += `- ${reply.authorName} (${reply.authorHandle}): "${reply.text}"\n`;
     });
   }
 

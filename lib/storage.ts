@@ -18,6 +18,7 @@ const DEFAULT_STATE: State = {
   history: {},
   targets: DEFAULT_TARGETS,
   useImageUnderstanding: false,
+  useMemory: false,
 };
 
 async function getStorageItem<T>(key: string): Promise<T | undefined> {
@@ -144,6 +145,24 @@ export async function resetForDate(date?: string): Promise<void> {
 export async function setUseImageUnderstanding(useImageUnderstanding: boolean): Promise<void> {
   const state = await getState();
   state.useImageUnderstanding = useImageUnderstanding;
+  await setState(state);
+}
+
+export async function setMemoryApiKey(apiKey: string): Promise<void> {
+  const state = await getState();
+  state.memoryApiKey = apiKey;
+  await setState(state);
+}
+
+export async function setMemoryProjectId(projectId: string): Promise<void> {
+  const state = await getState();
+  state.memoryProjectId = projectId;
+  await setState(state);
+}
+
+export async function setUseMemory(useMemory: boolean): Promise<void> {
+  const state = await getState();
+  state.useMemory = useMemory;
   await setState(state);
 }
 

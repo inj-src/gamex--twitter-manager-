@@ -43,7 +43,7 @@ export function extractConversationContext(): ConversationContext {
 }
 
 function extractTweetData(element: Element): TweetContent | null {
-  // TODO: The tweet data extraction needs to be improved
+  // TODO: The tweet data extraction needs more attention
   // By using semantic HTML attributes or Twitter's internal data structures if accessible
   const tweetTextElement = element.querySelector('[data-testid="tweetText"]');
   const text = tweetTextElement ? (tweetTextElement as HTMLElement).innerText : "";
@@ -54,9 +54,6 @@ function extractTweetData(element: Element): TweetContent | null {
   let authorHandle = "";
 
   if (userElement) {
-    const nameElement = userElement.querySelector("span > span"); // Approximate
-    const handleElement = userElement.querySelector('a[href^="/"] > div > span'); // Approximate
-
     // A more robust way to get handle is looking for the @ text
     const allText = (userElement as HTMLElement).innerText;
     const lines = allText.split("\n");
