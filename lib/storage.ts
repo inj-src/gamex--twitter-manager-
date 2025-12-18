@@ -6,7 +6,9 @@ import { DEFAULT_TARGETS } from "./types.ts";
 
 // Use typed `browser` global provided by WXT; remove manual declarations
 
-const STORAGE_KEY = "tweetReplyState";
+const CORE_STATE_KEY = "coreState";
+const STORED_REPLIES_KEY = "storedReplies";
+const LEGACY_STORAGE_KEY = "tweetReplyState";
 
 const DEFAULT_STATE: State = {
   daily: {
@@ -19,7 +21,6 @@ const DEFAULT_STATE: State = {
   targets: DEFAULT_TARGETS,
   useImageUnderstanding: false,
   useMemory: false,
-  storedReplies: [],
 };
 
 async function getStorageItem<T>(key: string): Promise<T | undefined> {
@@ -31,8 +32,33 @@ async function setStorageItem(key: string, value: any): Promise<void> {
   await browser.storage.local.set({ [key]: value });
 }
 
+/**
+ * Migration logic from the old single-key storage to the new multi-key storage.
+ */
+async function migrateIfNeeded(): Promise<void> {
+  const legacy = await getStorageItem<any>(LEGACY_STORAGE_KEY);
+  if (legacy) {
+    const { storedReplies, ...coreState } = legacy;
+    
+    // Save to new keys if they don't exist yet
+    const existingCore = await getStorageItem(CORE_STATE_KEY);
+    if (!existingCore) {
+      await setStorageItem(CORE_STATE_KEY, coreState);
+    }
+    
+    const existingReplies = await getStorageItem(STORED_REPLIES_KEY);
+    if (!existingReplies) {
+      await setStorageItem(STORED_REPLIES_KEY, storedReplies || []);
+    }
+    
+    // Clean up legacy key
+    await browser.storage.local.remove(LEGACY_STORAGE_KEY);
+  }
+}
+
 export async function getState(): Promise<State> {
-  const stored = await getStorageItem<State>(STORAGE_KEY);
+  await migrateIfNeeded();
+  const stored = await getStorageItem<State>(CORE_STATE_KEY);
   if (!stored) return { ...DEFAULT_STATE };
 
   // Merge with default to ensure structure
@@ -51,7 +77,7 @@ export async function getState(): Promise<State> {
 }
 
 export async function setState(state: State): Promise<void> {
-  await setStorageItem(STORAGE_KEY, state);
+  await setStorageItem(CORE_STATE_KEY, state);
   try {
     browser.runtime.sendMessage({ type: "stateChanged", state }).catch(() => {});
   } catch (e) {
@@ -61,7 +87,6 @@ export async function setState(state: State): Promise<void> {
 
 export async function ensureStateInitialized(): Promise<void> {
   const state = await getState();
-  // getState already merges with defaults, so we just save it to persist any missing fields
   await setState(state);
 }
 
@@ -88,8 +113,11 @@ export async function increment(type: CounterType): Promise<void> {
 
   rolloverDateIfNeeded(state, today);
 
-  if (type === "tweet") state.daily.tweets += 1;
-  else state.daily.replies += 1;
+  if (type === "tweet") {
+    state.daily.tweets += 1;
+  } else {
+    state.daily.replies += 1;
+  }
 
   await setState(state);
 }
@@ -175,15 +203,13 @@ export function millisUntilNextLocalMidnight(): number {
 }
 
 export async function addStoredReply(reply: StoredReply): Promise<void> {
-  const state = await getState();
-  if (!state.storedReplies) {
-    state.storedReplies = [];
-  }
-  state.storedReplies.push(reply);
-  await setState(state);
+  const replies = await getStoredReplies();
+  replies.push(reply);
+  await setStorageItem(STORED_REPLIES_KEY, replies);
 }
 
 export async function getStoredReplies(): Promise<StoredReply[]> {
-  const state = await getState();
-  return state.storedReplies || [];
+  await migrateIfNeeded();
+  const replies = await getStorageItem<StoredReply[]>(STORED_REPLIES_KEY);
+  return replies || [];
 }

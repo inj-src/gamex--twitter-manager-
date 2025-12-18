@@ -54,8 +54,6 @@ function handleCreateTweetRequest(details: any) {
     const payload = extractPayload(details.requestBody);
     const kind = classifyCreateTweetPayload(payload);
 
-    console.log({ kind });
-
     if (kind !== "unknown") {
       increment(kind).catch((e) => console.error(e));
     }
