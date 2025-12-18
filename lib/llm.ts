@@ -1,5 +1,5 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createGoogleGenerativeAI, GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
 import { generateText, UserContent, LanguageModel } from "ai";
 // import { streamText } from "ai";
 
@@ -75,46 +75,32 @@ export async function generateReply(context: ConversationContext): Promise<strin
     const systemContent = generateSystemPrompt(context.userInstructions, useMemory, storedReplies);
     let text: string;
 
-    if (useMemory && memoryApiKey) {
-      const result = await generateText({
-        model,
-        messages: [
-          {
-            role: "system",
-            content: systemContent,
-          },
-          {
-            role: "user",
-            content: userContent,
-          },
-        ],
-        tools: {
-          searchMemories: searchMemoriesTool(
-            memoryApiKey,
-            memoryProjectId ? { projectId: memoryProjectId } : undefined
-          ),
+
+    const result = await generateText({
+      model,
+      messages: [
+        {
+          role: "system",
+          content: systemContent,
         },
-        // maxSteps: 2,
-        temperature: 0.7,
-      });
-      text = result.text;
-    } else {
-      const result = await generateText({
-        model,
-        messages: [
-          {
-            role: "system",
-            content: systemContent,
+        {
+          role: "user",
+          content: userContent,
+        },
+      ],
+      providerOptions: {
+        google: {
+          thinkingConfig: {
+            thinkingLevel: 'low',
+            includeThoughts: false,
           },
-          {
-            role: "user",
-            content: userContent,
-          },
-        ],
-        // temperature: 0.7,
-      });
-      text = result.text;
-    }
+        } satisfies GoogleGenerativeAIProviderOptions,
+      },
+      temperature: 0.7,
+    });
+
+    text = result.text;
+
 
     return text.trim();
   } catch (error) {
