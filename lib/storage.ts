@@ -1,7 +1,7 @@
 // TODO: The storage module needs refactoring
 
 import dayjs from "dayjs";
-import type { State, DailyCounts, CounterType, StoredReply } from "./types.ts";
+import type { State, DailyCounts, CounterType, StoredReply, Provider } from "./types.ts";
 import { DEFAULT_TARGETS } from "./types.ts";
 
 // Use typed `browser` global provided by WXT; remove manual declarations
@@ -143,9 +143,21 @@ export async function setTargets(tweets: number, replies: number): Promise<void>
   await setState(state);
 }
 
+export async function setProvider(provider: Provider): Promise<void> {
+  const state = await getState();
+  state.provider = provider;
+  await setState(state);
+}
+
 export async function setOpenRouterApiKey(apiKey: string): Promise<void> {
   const state = await getState();
   state.openRouterApiKey = apiKey;
+  await setState(state);
+}
+
+export async function setGoogleApiKey(apiKey: string): Promise<void> {
+  const state = await getState();
+  state.googleApiKey = apiKey;
   await setState(state);
 }
 

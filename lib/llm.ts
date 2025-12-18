@@ -1,5 +1,6 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { generateText, UserContent } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { generateText, UserContent, LanguageModel } from "ai";
 // import { streamText } from "ai";
 
 import { searchMemoriesTool } from "@supermemory/tools/ai-sdk";
@@ -7,42 +8,67 @@ import { ConversationContext } from "./extract";
 import { getState, getStoredReplies } from "./storage";
 import { generateSystemPrompt } from "./generateSystemPrompt";
 import { constructPrompt } from "./constructPrompt";
+import type { Provider } from "./types";
 
-const DEFAULT_MODEL = "moonshotai/kimi-k2:free"; // Cost-effective and fast
-const VISION_MODEL = "nvidia/nemotron-nano-12b-v2-vl:free";
+const DEFAULT_OPENROUTER_MODEL = "moonshotai/kimi-k2:free"; // Cost-effective and fast
+const DEFAULT_GOOGLE_MODEL = "gemini-3-flash-preview";
+
+function getModel(
+  provider: Provider,
+  modelName: string,
+  openRouterApiKey?: string,
+  googleApiKey?: string
+): LanguageModel {
+  if (provider === "google") {
+    if (!googleApiKey) {
+      throw new Error("Google API Key not found. Please set it in the extension popup.");
+    }
+    const google = createGoogleGenerativeAI({ apiKey: googleApiKey });
+    return google(modelName || DEFAULT_GOOGLE_MODEL);
+  } else {
+    if (!openRouterApiKey) {
+      throw new Error("OpenRouter API Key not found. Please set it in the extension popup.");
+    }
+    const openRouter = createOpenRouter({ apiKey: openRouterApiKey });
+    return openRouter(modelName || DEFAULT_OPENROUTER_MODEL);
+  }
+}
 
 export async function generateReply(context: ConversationContext): Promise<string> {
   const state = await getState();
-  const apiKey = state.openRouterApiKey;
-  const modelName = state.llmModel || DEFAULT_MODEL;
+  const provider = state.provider || "openrouter";
+  const openRouterApiKey = state.openRouterApiKey;
+  const googleApiKey = state.googleApiKey;
+  const modelName = state.llmModel || (provider === "google" ? DEFAULT_GOOGLE_MODEL : DEFAULT_OPENROUTER_MODEL);
   const useMemory = state.useMemory;
   const memoryApiKey = state.memoryApiKey;
   const memoryProjectId = state.memoryProjectId;
 
-  if (!apiKey) {
-    throw new Error("OpenRouter API Key not found. Please set it in the extension popup.");
-  }
+  const model = getModel(provider, modelName, openRouterApiKey, googleApiKey);
 
   if (!context.mainTweet) {
     throw new Error("No main tweet found to reply to.");
   }
 
-  let imageDescription = "";
+  const prompt = constructPrompt(context);
+
+  const userContent: UserContent = [
+    {
+      type: "text",
+      text: prompt,
+    },
+  ];
+
   if (state.useImageUnderstanding && context.mainTweet.images.length > 0) {
-    try {
-      imageDescription = await getImageDescription(context.mainTweet.images);
-    } catch (error) {
-      console.error("Failed to get image description, proceeding without it.", error);
-    }
+    context.mainTweet.images.forEach((imageUrl) => {
+      userContent.push({
+        type: "image",
+        image: imageUrl,
+      });
+    });
   }
 
-  const openRouter = createOpenRouter({
-    apiKey: apiKey,
-  });
-
-  const prompt = constructPrompt(context, imageDescription);
-
-  console.log("Generating reply with prompt:", prompt);
+  console.log("Generating reply with prompt content:", userContent);
 
   try {
     const storedReplies = await getStoredReplies();
@@ -51,7 +77,7 @@ export async function generateReply(context: ConversationContext): Promise<strin
 
     if (useMemory && memoryApiKey) {
       const result = await generateText({
-        model: openRouter(modelName),
+        model,
         messages: [
           {
             role: "system",
@@ -59,7 +85,7 @@ export async function generateReply(context: ConversationContext): Promise<strin
           },
           {
             role: "user",
-            content: prompt,
+            content: userContent,
           },
         ],
         tools: {
@@ -74,7 +100,7 @@ export async function generateReply(context: ConversationContext): Promise<strin
       text = result.text;
     } else {
       const result = await generateText({
-        model: openRouter(modelName),
+        model,
         messages: [
           {
             role: "system",
@@ -82,10 +108,10 @@ export async function generateReply(context: ConversationContext): Promise<strin
           },
           {
             role: "user",
-            content: prompt,
+            content: userContent,
           },
         ],
-        temperature: 0.7,
+        // temperature: 0.7,
       });
       text = result.text;
     }
@@ -97,53 +123,3 @@ export async function generateReply(context: ConversationContext): Promise<strin
   }
 }
 
-export async function getImageDescription(imageUrls: string[]): Promise<string> {
-  const state = await getState();
-  const apiKey = state.openRouterApiKey;
-
-  if (!apiKey) {
-    throw new Error("OpenRouter API Key not found. Please set it in the extension popup.");
-  }
-
-  if (imageUrls.length === 0) {
-    return "";
-  }
-
-  const openRouter = createOpenRouter({
-    apiKey: apiKey,
-  });
-
-  const content: UserContent = [
-    {
-      type: "text",
-      text: "Describe the visual content and meaning of this image in a concise way.",
-    },
-  ];
-
-  imageUrls.forEach((imageUrl) => {
-    content.push({
-      type: "image",
-      image: imageUrl,
-    });
-  });
-
-  console.log("Getting image description with content:", content);
-
-  try {
-    const { text } = await generateText({
-      model: openRouter(VISION_MODEL),
-      messages: [
-        {
-          role: "user",
-          content,
-        },
-      ],
-      temperature: 0.5,
-    });
-
-    return text.trim();
-  } catch (error) {
-    console.error("Error getting image description:", error);
-    throw error;
-  }
-}

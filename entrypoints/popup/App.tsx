@@ -4,14 +4,16 @@ import {
   getState,
   setTargets,
   resetForDate,
+  setProvider,
   setOpenRouterApiKey,
+  setGoogleApiKey,
   setLlmModel,
   setUseImageUnderstanding,
   setMemoryApiKey,
   setMemoryProjectId,
   setUseMemory,
 } from "@/lib/storage";
-import type { State } from "@/lib/types";
+import type { State, Provider } from "@/lib/types";
 import { MessageCircle, Twitter } from "lucide-react";
 import { Header } from "@/components/Header";
 import { StatCard } from "@/components/StatCard";
@@ -23,7 +25,9 @@ import { Separator } from "@/components/ui/separator";
 function App() {
   const [state, setState] = useState<State | null>(null);
   const [targets, setLocalTargets] = useState({ tweets: 5, replies: 50 });
+  const [provider, setProviderLocal] = useState<Provider>("openrouter");
   const [apiKey, setApiKey] = useState("");
+  const [googleApiKey, setGoogleApiKeyLocal] = useState("");
   const [llmModel, setLlmModelLocal] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [useImageUnderstanding, setUseImageUnderstandingLocal] = useState(false);
@@ -39,7 +43,9 @@ function App() {
       if (!mounted) return;
       setState(s);
       setLocalTargets(s.targets || { tweets: 5, replies: 50 });
+      setProviderLocal(s.provider || "openrouter");
       setApiKey(s.openRouterApiKey || "");
+      setGoogleApiKeyLocal(s.googleApiKey || "");
       setLlmModelLocal(s.llmModel || "");
       setUseImageUnderstandingLocal(s.useImageUnderstanding || false);
       setMemoryApiKeyLocal(s.memoryApiKey || "");
@@ -68,9 +74,19 @@ function App() {
     setTargets(newTargets.tweets, newTargets.replies);
   }
 
+  function onUpdateProvider(newProvider: Provider) {
+    setProviderLocal(newProvider);
+    setProvider(newProvider);
+  }
+
   function onUpdateApiKey(newKey: string) {
     setApiKey(newKey);
     setOpenRouterApiKey(newKey);
+  }
+
+  function onUpdateGoogleApiKey(newKey: string) {
+    setGoogleApiKeyLocal(newKey);
+    setGoogleApiKey(newKey);
   }
 
   function onUpdateLlmModel(newModel: string) {
@@ -142,14 +158,18 @@ function App() {
         {isSettingsOpen && (
           <SettingsPanel
             targets={targets}
+            provider={provider}
             apiKey={apiKey}
+            googleApiKey={googleApiKey}
             llmModel={llmModel}
             useImageUnderstanding={useImageUnderstanding}
             memoryApiKey={memoryApiKey}
             memoryProjectId={memoryProjectId}
             useMemory={useMemory}
             onUpdateTargets={onUpdateTargets}
+            onUpdateProvider={onUpdateProvider}
             onUpdateApiKey={onUpdateApiKey}
+            onUpdateGoogleApiKey={onUpdateGoogleApiKey}
             onUpdateLlmModel={onUpdateLlmModel}
             onUpdateUseImageUnderstanding={onUpdateUseImageUnderstanding}
             onUpdateMemoryApiKey={onUpdateMemoryApiKey}

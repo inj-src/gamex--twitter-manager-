@@ -1,17 +1,12 @@
 import { ConversationContext } from "./extract";
 
 export function constructPrompt(
-  context: ConversationContext,
-  imageDescription: string = ""
+  context: ConversationContext
 ): string {
   let prompt = `Main Tweet by ${context.mainTweet?.authorName} (@${context.mainTweet?.authorHandle}):\n${context.mainTweet?.text}\n`;
 
   if (context.mainTweet?.images.length) {
     prompt += `[Attached Images: ${context.mainTweet.images.length}]\n`;
-  }
-
-  if (imageDescription) {
-    prompt += `[Image Description: ${imageDescription}]\n`;
   }
 
   if (context.replies.length > 0) {

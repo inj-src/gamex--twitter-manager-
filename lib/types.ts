@@ -19,11 +19,15 @@ export interface StoredReply {
   aiGeneratedReply?: string; // Original AI reply (for modified type)
 }
 
+export type Provider = 'openrouter' | 'google';
+
 export interface State {
   daily: DailyCounts;
   history: Record<string, { tweets: number; replies: number; seconds: number }>;
   targets: { tweets: number; replies: number };
+  provider?: Provider;
   openRouterApiKey?: string;
+  googleApiKey?: string;
   llmModel?: string;
   useImageUnderstanding: boolean;
   memoryApiKey?: string;
