@@ -22,6 +22,8 @@ const DEFAULT_STATE: State = {
   useImageUnderstanding: false,
   useMemory: false,
   selectedPromptId: "sigma-ragebait",
+  openRouterModel: "moonshotai/kimi-k2:free",
+  googleModel: "gemini-3-flash-preview",
 };
 
 async function getStorageItem<T>(key: string): Promise<T | undefined> {
@@ -58,9 +60,13 @@ async function migrateIfNeeded(): Promise<void> {
 }
 
 export async function getState(): Promise<State> {
+  console.log("[DEBUG][Storage] getState() called");
   await migrateIfNeeded();
   const stored = await getStorageItem<State>(CORE_STATE_KEY);
-  if (!stored) return { ...DEFAULT_STATE };
+  if (!stored) {
+    console.log("[DEBUG][Storage] No stored state found, returning default");
+    return { ...DEFAULT_STATE };
+  }
 
   // Merge with default to ensure structure
   const state = { ...DEFAULT_STATE, ...stored };
@@ -74,6 +80,18 @@ export async function getState(): Promise<State> {
     state.targets = DEFAULT_TARGETS;
   }
 
+  // Handle migration from llmModel to provider-specific models
+  if ((stored as any).llmModel) {
+    if (!state.openRouterModel) {
+      state.openRouterModel = (stored as any).llmModel;
+    }
+  }
+
+  // Ensure defaults for models if not set
+  if (!state.openRouterModel) state.openRouterModel = DEFAULT_STATE.openRouterModel;
+  if (!state.googleModel) state.googleModel = DEFAULT_STATE.googleModel;
+
+  console.log("[DEBUG][Storage] getState() returning stored state");
   return state;
 }
 
@@ -162,9 +180,15 @@ export async function setGoogleApiKey(apiKey: string): Promise<void> {
   await setState(state);
 }
 
-export async function setLlmModel(llmModel: string): Promise<void> {
+export async function setOpenRouterModel(model: string): Promise<void> {
   const state = await getState();
-  state.llmModel = llmModel;
+  state.openRouterModel = model;
+  await setState(state);
+}
+
+export async function setGoogleModel(model: string): Promise<void> {
+  const state = await getState();
+  state.googleModel = model;
   await setState(state);
 }
 
@@ -228,7 +252,9 @@ export async function addStoredReply(reply: StoredReply): Promise<void> {
 }
 
 export async function getStoredReplies(): Promise<StoredReply[]> {
+  console.log("[DEBUG][Storage] getStoredReplies() called");
   await migrateIfNeeded();
   const replies = await getStorageItem<StoredReply[]>(STORED_REPLIES_KEY);
+  console.log(`[DEBUG][Storage] getStoredReplies() returning ${replies?.length || 0} replies`);
   return replies || [];
 }

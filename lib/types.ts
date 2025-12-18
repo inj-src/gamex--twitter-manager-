@@ -28,7 +28,8 @@ export interface State {
   provider?: Provider;
   openRouterApiKey?: string;
   googleApiKey?: string;
-  llmModel?: string;
+  openRouterModel?: string;
+  googleModel?: string;
   useImageUnderstanding: boolean;
   memoryApiKey?: string;
   memoryProjectId?: string;

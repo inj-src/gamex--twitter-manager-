@@ -35,18 +35,34 @@ function getModel(
 }
 
 export async function generateReply(context: ConversationContext): Promise<string> {
+  console.log("\n========== [DEBUG] generateReply() STARTED ==========");
+  console.log("[DEBUG] Timestamp:", new Date().toISOString());
+
+  console.log("[DEBUG] Step 1: Fetching state from storage...");
+  const stateStartTime = performance.now();
   const state = await getState();
-  console.log("[LLM] Current state extracted:", state);
+  console.log(`[DEBUG] Step 1 COMPLETE: State fetched in ${(performance.now() - stateStartTime).toFixed(2)}ms`);
+  console.log("[DEBUG] State keys:", Object.keys(state));
+
   const provider = state.provider || "openrouter";
   const openRouterApiKey = state.openRouterApiKey;
   const googleApiKey = state.googleApiKey;
-  const modelName = state.llmModel || (provider === "google" ? DEFAULT_GOOGLE_MODEL : DEFAULT_OPENROUTER_MODEL);
+  const modelName =
+    provider === "google"
+      ? state.googleModel || DEFAULT_GOOGLE_MODEL
+      : state.openRouterModel || DEFAULT_OPENROUTER_MODEL;
   const useMemory = state.useMemory;
   const memoryApiKey = state.memoryApiKey;
   const memoryProjectId = state.memoryProjectId;
   const selectedPromptId = state.selectedPromptId;
 
-  console.log("[LLM] Using prompt ID:", selectedPromptId);
+  console.log("[DEBUG] Configuration:", {
+    provider,
+    modelName,
+    useMemory,
+    hasMemoryApiKey: !!memoryApiKey,
+    selectedPromptId,
+  });
 
   const model = getModel(provider, modelName, openRouterApiKey, googleApiKey);
 
@@ -73,11 +89,24 @@ export async function generateReply(context: ConversationContext): Promise<strin
   }
 
   try {
+    console.log("[DEBUG] Step 2: Fetching stored replies from storage...");
+    const repliesStartTime = performance.now();
     const storedReplies = await getStoredReplies();
+    console.log(`[DEBUG] Step 2 COMPLETE: Stored replies fetched in ${(performance.now() - repliesStartTime).toFixed(2)}ms`);
+    console.log(`[DEBUG] Found ${storedReplies.length} stored replies`);
+
+    console.log("[DEBUG] Step 3: Generating system prompt...");
+    const promptStartTime = performance.now();
     const systemContent = generateSystemPrompt(context.userInstructions, useMemory, storedReplies, selectedPromptId);
+    console.log(`[DEBUG] Step 3 COMPLETE: System prompt generated in ${(performance.now() - promptStartTime).toFixed(2)}ms`);
+    console.log(`[DEBUG] System prompt length: ${systemContent.length} chars`);
+
     let text: string;
 
-    console.log(systemContent)
+    console.log("[DEBUG] Step 4: Calling LLM API...");
+    console.log(`[DEBUG] Provider: ${provider}, Model: ${modelName}`);
+    const llmStartTime = performance.now();
+
     const result = await generateText({
       model,
       messages: [
@@ -101,8 +130,12 @@ export async function generateReply(context: ConversationContext): Promise<strin
       temperature: 0.7,
     });
 
-    text = result.text;
+    console.log(`[DEBUG] Step 4 COMPLETE: LLM API responded in ${(performance.now() - llmStartTime).toFixed(2)}ms`);
+    console.log("[DEBUG] LLM result usage:", result.usage);
 
+    text = result.text;
+    console.log(`[DEBUG] Generated reply length: ${text.length} chars`);
+    console.log("========== [DEBUG] generateReply() FINISHED ==========\n");
 
     return text.trim();
   } catch (error) {

@@ -79,17 +79,31 @@ function injectAIButton(group: HTMLElement) {
     e.preventDefault();
     e.stopPropagation();
 
+    console.log("\n##################################################");
+    console.log("[DEBUG][Content] AI Reply button clicked!");
+    console.log("[DEBUG][Content] Starting reply generation flow...");
+    console.log("##################################################\n");
+
     // New Spinner SVG
     try {
       // Loading state
       button.innerHTML = spinnerIcon;
 
       // 1. Extract context
+      console.log("[DEBUG][Content] Extracting conversation context...");
       const context = extractConversationContext();
+      console.log("[DEBUG][Content] Context extracted:", {
+        hasMainTweet: !!context.mainTweet,
+        repliesCount: context.replies.length,
+        hasUserInstructions: !!context.userInstructions,
+      });
 
       // 2. Generate reply
+      console.log("[DEBUG][Content] Calling generateReply()...");
+      const replyStartTime = performance.now();
       const reply = await generateReply(context);
-      console.log("Generated reply:", reply);
+      console.log(`[DEBUG][Content] Reply generated in ${(performance.now() - replyStartTime).toFixed(2)}ms`);
+      console.log("[DEBUG][Content] Generated reply:", reply);
 
       // Get the container for storing AI generated reply attribute
       const replyContainer = document.querySelector(

@@ -7,7 +7,8 @@ import {
   setProvider,
   setOpenRouterApiKey,
   setGoogleApiKey,
-  setLlmModel,
+  setOpenRouterModel,
+  setGoogleModel,
   setUseImageUnderstanding,
   setMemoryApiKey,
   setMemoryProjectId,
@@ -30,7 +31,8 @@ function App() {
   const [provider, setProviderLocal] = useState<Provider>("openrouter");
   const [apiKey, setApiKey] = useState("");
   const [googleApiKey, setGoogleApiKeyLocal] = useState("");
-  const [llmModel, setLlmModelLocal] = useState("");
+  const [openRouterModel, setOpenRouterModelLocal] = useState("");
+  const [googleModel, setGoogleModelLocal] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [useImageUnderstanding, setUseImageUnderstandingLocal] = useState(false);
   const [memoryApiKey, setMemoryApiKeyLocal] = useState("");
@@ -49,7 +51,8 @@ function App() {
       setProviderLocal(s.provider || "openrouter");
       setApiKey(s.openRouterApiKey || "");
       setGoogleApiKeyLocal(s.googleApiKey || "");
-      setLlmModelLocal(s.llmModel || "");
+      setOpenRouterModelLocal(s.openRouterModel || "");
+      setGoogleModelLocal(s.googleModel || "");
       setUseImageUnderstandingLocal(s.useImageUnderstanding || false);
       setMemoryApiKeyLocal(s.memoryApiKey || "");
       setMemoryProjectIdLocal(s.memoryProjectId || "");
@@ -93,9 +96,14 @@ function App() {
     setGoogleApiKey(newKey);
   }
 
-  function onUpdateLlmModel(newModel: string) {
-    setLlmModelLocal(newModel);
-    setLlmModel(newModel);
+  function onUpdateOpenRouterModel(newModel: string) {
+    setOpenRouterModelLocal(newModel);
+    setOpenRouterModel(newModel);
+  }
+
+  function onUpdateGoogleModel(newModel: string) {
+    setGoogleModelLocal(newModel);
+    setGoogleModel(newModel);
   }
 
   function onUpdateUseImageUnderstanding(enabled: boolean) {
@@ -170,7 +178,8 @@ function App() {
             provider={provider}
             apiKey={apiKey}
             googleApiKey={googleApiKey}
-            llmModel={llmModel}
+            openRouterModel={openRouterModel}
+            googleModel={googleModel}
             useImageUnderstanding={useImageUnderstanding}
             memoryApiKey={memoryApiKey}
             memoryProjectId={memoryProjectId}
@@ -180,7 +189,8 @@ function App() {
             onUpdateProvider={onUpdateProvider}
             onUpdateApiKey={onUpdateApiKey}
             onUpdateGoogleApiKey={onUpdateGoogleApiKey}
-            onUpdateLlmModel={onUpdateLlmModel}
+            onUpdateOpenRouterModel={onUpdateOpenRouterModel}
+            onUpdateGoogleModel={onUpdateGoogleModel}
             onUpdateUseImageUnderstanding={onUpdateUseImageUnderstanding}
             onUpdateMemoryApiKey={onUpdateMemoryApiKey}
             onUpdateMemoryProjectId={onUpdateMemoryProjectId}

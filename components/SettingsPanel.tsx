@@ -19,7 +19,8 @@ interface SettingsPanelProps {
   provider: Provider;
   apiKey: string;
   googleApiKey: string;
-  llmModel: string;
+  openRouterModel: string;
+  googleModel: string;
   useImageUnderstanding: boolean;
   memoryApiKey: string;
   memoryProjectId: string;
@@ -29,7 +30,8 @@ interface SettingsPanelProps {
   onUpdateProvider: (provider: Provider) => void;
   onUpdateApiKey: (key: string) => void;
   onUpdateGoogleApiKey: (key: string) => void;
-  onUpdateLlmModel: (model: string) => void;
+  onUpdateOpenRouterModel: (model: string) => void;
+  onUpdateGoogleModel: (model: string) => void;
   onUpdateUseImageUnderstanding: (enabled: boolean) => void;
   onUpdateMemoryApiKey: (key: string) => void;
   onUpdateMemoryProjectId: (id: string) => void;
@@ -43,7 +45,8 @@ export function SettingsPanel({
   provider,
   apiKey,
   googleApiKey,
-  llmModel,
+  openRouterModel,
+  googleModel,
   useImageUnderstanding,
   memoryApiKey,
   memoryProjectId,
@@ -53,7 +56,8 @@ export function SettingsPanel({
   onUpdateProvider,
   onUpdateApiKey,
   onUpdateGoogleApiKey,
-  onUpdateLlmModel,
+  onUpdateOpenRouterModel,
+  onUpdateGoogleModel,
   onUpdateUseImageUnderstanding,
   onUpdateMemoryApiKey,
   onUpdateMemoryProjectId,
@@ -134,7 +138,7 @@ export function SettingsPanel({
             <div className="space-y-1">
               <label className="text-muted-foreground text-xs">OpenRouter API Key</label>
               <Input
-                type="password"
+                type="text"
                 value={apiKey}
                 onChange={(e) => onUpdateApiKey(e.target.value)}
                 className="bg-background border-border h-8"
@@ -147,7 +151,7 @@ export function SettingsPanel({
             <div className="space-y-1">
               <label className="text-muted-foreground text-xs">Google API Key</label>
               <Input
-                type="password"
+                type="text"
                 value={googleApiKey}
                 onChange={(e) => onUpdateGoogleApiKey(e.target.value)}
                 className="bg-background border-border h-8"
@@ -156,16 +160,31 @@ export function SettingsPanel({
             </div>
           )}
 
-          <div className="space-y-1">
-            <label className="text-muted-foreground text-xs">LLM Model</label>
-            <Input
-              type="text"
-              value={llmModel}
-              onChange={(e) => onUpdateLlmModel(e.target.value)}
-              className="bg-background border-border h-8"
-              placeholder={provider === "google" ? "gemini-3-flash-preview" : "moonshotai/kimi-k2:free"}
-            />
-          </div>
+          {provider === "openrouter" && (
+            <div className="space-y-1">
+              <label className="text-muted-foreground text-xs">OpenRouter Model</label>
+              <Input
+                type="text"
+                value={openRouterModel}
+                onChange={(e) => onUpdateOpenRouterModel(e.target.value)}
+                className="bg-background border-border h-8"
+                placeholder="moonshotai/kimi-k2:free"
+              />
+            </div>
+          )}
+
+          {provider === "google" && (
+            <div className="space-y-1">
+              <label className="text-muted-foreground text-xs">Google Model</label>
+              <Input
+                type="text"
+                value={googleModel}
+                onChange={(e) => onUpdateGoogleModel(e.target.value)}
+                className="bg-background border-border h-8"
+                placeholder="gemini-3-flash-preview"
+              />
+            </div>
+          )}
           <div className="flex justify-between items-center">
             <label className="text-muted-foreground text-xs">Image Understanding</label>
             <Switch
