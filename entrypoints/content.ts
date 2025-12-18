@@ -1,10 +1,14 @@
 import { extractConversationContext } from "@/lib/extract";
 import { generateReply } from "@/lib/llm";
+import { setupReplyCaptureListener } from "@/lib/replyCapture";
 
 export default defineContentScript({
   matches: ["*://*.x.com/*"],
   main() {
     console.log("X-Tracker content script loaded.");
+
+    // Initialize reply capture listener
+    setupReplyCaptureListener();
 
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
@@ -87,14 +91,24 @@ function injectAIButton(group: HTMLElement) {
       const reply = await generateReply(context);
       console.log("Generated reply:", reply);
 
+      // Get the container for storing AI generated reply attribute
       const replyContainer = document.querySelector(
+        'div[data-testid="inline_reply_offscreen"]'
+      ) as HTMLElement;
+
+      const replyElement = document.querySelector(
         'div[data-testid="inline_reply_offscreen"] .DraftEditor-root'
       ) as HTMLElement;
 
-      if (replyContainer) {
-        replyContainer.click();
+      if (replyElement) {
+        replyElement.click();
 
-        // tiny dealy for the system to repsonse
+        // Store AI reply for comparison when user sends
+        if (replyContainer) {
+          replyContainer.setAttribute("data-ai-generated-reply", reply);
+        }
+
+        // tiny delay for the system to respond
         await new Promise((resolve) => setTimeout(resolve, 300));
         document.execCommand("insertText", false, reply);
       } else {

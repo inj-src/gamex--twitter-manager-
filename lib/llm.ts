@@ -4,7 +4,7 @@ import { generateText, UserContent } from "ai";
 
 import { searchMemoriesTool } from "@supermemory/tools/ai-sdk";
 import { ConversationContext } from "./extract";
-import { getState } from "./storage";
+import { getState, getStoredReplies } from "./storage";
 import { generateSystemPrompt } from "./generateSystemPrompt";
 import { constructPrompt } from "./constructPrompt";
 
@@ -45,7 +45,8 @@ export async function generateReply(context: ConversationContext): Promise<strin
   console.log("Generating reply with prompt:", prompt);
 
   try {
-    const systemContent = generateSystemPrompt(context.userInstructions, useMemory);
+    const storedReplies = await getStoredReplies();
+    const systemContent = generateSystemPrompt(context.userInstructions, useMemory, storedReplies);
     let text: string;
 
     if (useMemory && memoryApiKey) {

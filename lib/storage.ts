@@ -1,7 +1,7 @@
 // TODO: The storage module needs refactoring
 
 import dayjs from "dayjs";
-import type { State, DailyCounts, CounterType } from "./types.ts";
+import type { State, DailyCounts, CounterType, StoredReply } from "./types.ts";
 import { DEFAULT_TARGETS } from "./types.ts";
 
 // Use typed `browser` global provided by WXT; remove manual declarations
@@ -19,6 +19,7 @@ const DEFAULT_STATE: State = {
   targets: DEFAULT_TARGETS,
   useImageUnderstanding: false,
   useMemory: false,
+  storedReplies: [],
 };
 
 async function getStorageItem<T>(key: string): Promise<T | undefined> {
@@ -171,4 +172,18 @@ export function millisUntilNextLocalMidnight(): number {
   const now = dayjs();
   const next = now.add(1, "day").startOf("day");
   return next.diff(now);
+}
+
+export async function addStoredReply(reply: StoredReply): Promise<void> {
+  const state = await getState();
+  if (!state.storedReplies) {
+    state.storedReplies = [];
+  }
+  state.storedReplies.push(reply);
+  await setState(state);
+}
+
+export async function getStoredReplies(): Promise<StoredReply[]> {
+  const state = await getState();
+  return state.storedReplies || [];
 }

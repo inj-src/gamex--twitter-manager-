@@ -42,7 +42,7 @@ export function extractConversationContext(): ConversationContext {
   };
 }
 
-function extractTweetData(element: Element): TweetContent | null {
+export function extractTweetData(element: Element): TweetContent | null {
   // TODO: The tweet data extraction needs more attention
   // By using semantic HTML attributes or Twitter's internal data structures if accessible
   const tweetTextElement = element.querySelector('[data-testid="tweetText"]');
