@@ -21,6 +21,7 @@ const DEFAULT_STATE: State = {
   targets: DEFAULT_TARGETS,
   useImageUnderstanding: false,
   useMemory: false,
+  selectedPromptId: "sigma-ragebait",
 };
 
 async function getStorageItem<T>(key: string): Promise<T | undefined> {
@@ -204,6 +205,12 @@ export async function setMemoryProjectId(projectId: string): Promise<void> {
 export async function setUseMemory(useMemory: boolean): Promise<void> {
   const state = await getState();
   state.useMemory = useMemory;
+  await setState(state);
+}
+
+export async function setSelectedPromptId(promptId: string): Promise<void> {
+  const state = await getState();
+  state.selectedPromptId = promptId;
   await setState(state);
 }
 

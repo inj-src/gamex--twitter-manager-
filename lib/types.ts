@@ -33,6 +33,7 @@ export interface State {
   memoryApiKey?: string;
   memoryProjectId?: string;
   useMemory: boolean;
+  selectedPromptId?: string;
 }
 
 export const DEFAULT_TARGETS = { tweets: 5, replies: 50 };

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { RotateCcw } from "lucide-react";
 import type { Provider } from "@/lib/types";
+import { SYSTEM_PROMPT_PRESETS } from "@/lib/systemPrompts";
 
 interface SettingsPanelProps {
   targets: { tweets: number; replies: number };
@@ -23,6 +24,7 @@ interface SettingsPanelProps {
   memoryApiKey: string;
   memoryProjectId: string;
   useMemory: boolean;
+  selectedPrompt: string;
   onUpdateTargets: (targets: { tweets: number; replies: number }) => void;
   onUpdateProvider: (provider: Provider) => void;
   onUpdateApiKey: (key: string) => void;
@@ -32,6 +34,7 @@ interface SettingsPanelProps {
   onUpdateMemoryApiKey: (key: string) => void;
   onUpdateMemoryProjectId: (id: string) => void;
   onUpdateUseMemory: (enabled: boolean) => void;
+  onUpdateSelectedPrompt: (promptId: string) => void;
   onReset: () => void;
 }
 
@@ -45,6 +48,7 @@ export function SettingsPanel({
   memoryApiKey,
   memoryProjectId,
   useMemory,
+  selectedPrompt,
   onUpdateTargets,
   onUpdateProvider,
   onUpdateApiKey,
@@ -54,6 +58,7 @@ export function SettingsPanel({
   onUpdateMemoryApiKey,
   onUpdateMemoryProjectId,
   onUpdateUseMemory,
+  onUpdateSelectedPrompt,
   onReset,
 }: SettingsPanelProps) {
   return (
@@ -84,6 +89,27 @@ export function SettingsPanel({
               }
               className="bg-background border-border h-8"
             />
+          </div>
+        </div>
+
+        <Separator className="my-2 bg-border/50" />
+
+        <div className="space-y-3">
+          <h3 className="font-medium text-muted-foreground text-xs">System Prompt</h3>
+          <div className="space-y-1">
+            <label className="text-muted-foreground text-xs">Persona Style</label>
+            <Select value={selectedPrompt} onValueChange={onUpdateSelectedPrompt}>
+              <SelectTrigger className="bg-background border-border h-8 w-full">
+                <SelectValue placeholder="Select persona" />
+              </SelectTrigger>
+              <SelectContent>
+                {SYSTEM_PROMPT_PRESETS.map((preset) => (
+                  <SelectItem key={preset.id} value={preset.id}>
+                    {preset.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

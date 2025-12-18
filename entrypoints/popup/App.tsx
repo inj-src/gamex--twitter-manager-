@@ -12,8 +12,10 @@ import {
   setMemoryApiKey,
   setMemoryProjectId,
   setUseMemory,
+  setSelectedPromptId,
 } from "@/lib/storage";
 import type { State, Provider } from "@/lib/types";
+import { DEFAULT_PROMPT_ID } from "@/lib/systemPrompts";
 import { MessageCircle, Twitter } from "lucide-react";
 import { Header } from "@/components/Header";
 import { StatCard } from "@/components/StatCard";
@@ -34,6 +36,7 @@ function App() {
   const [memoryApiKey, setMemoryApiKeyLocal] = useState("");
   const [memoryProjectId, setMemoryProjectIdLocal] = useState("");
   const [useMemory, setUseMemoryLocal] = useState(false);
+  const [selectedPrompt, setSelectedPromptLocal] = useState(DEFAULT_PROMPT_ID);
 
   useEffect(() => {
     let mounted = true;
@@ -51,6 +54,7 @@ function App() {
       setMemoryApiKeyLocal(s.memoryApiKey || "");
       setMemoryProjectIdLocal(s.memoryProjectId || "");
       setUseMemoryLocal(s.useMemory || false);
+      setSelectedPromptLocal(s.selectedPromptId || DEFAULT_PROMPT_ID);
     };
 
     loadState();
@@ -114,6 +118,11 @@ function App() {
     setUseMemory(enabled);
   }
 
+  function onUpdateSelectedPrompt(promptId: string) {
+    setSelectedPromptLocal(promptId);
+    setSelectedPromptId(promptId);
+  }
+
   async function onReset() {
     await resetForDate(dayjs().format("YYYY-MM-DD"));
     const s = await getState();
@@ -166,6 +175,7 @@ function App() {
             memoryApiKey={memoryApiKey}
             memoryProjectId={memoryProjectId}
             useMemory={useMemory}
+            selectedPrompt={selectedPrompt}
             onUpdateTargets={onUpdateTargets}
             onUpdateProvider={onUpdateProvider}
             onUpdateApiKey={onUpdateApiKey}
@@ -175,6 +185,7 @@ function App() {
             onUpdateMemoryApiKey={onUpdateMemoryApiKey}
             onUpdateMemoryProjectId={onUpdateMemoryProjectId}
             onUpdateUseMemory={onUpdateUseMemory}
+            onUpdateSelectedPrompt={onUpdateSelectedPrompt}
             onReset={onReset}
           />
         )}

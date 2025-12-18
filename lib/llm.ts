@@ -36,6 +36,7 @@ function getModel(
 
 export async function generateReply(context: ConversationContext): Promise<string> {
   const state = await getState();
+  console.log("[LLM] Current state extracted:", state);
   const provider = state.provider || "openrouter";
   const openRouterApiKey = state.openRouterApiKey;
   const googleApiKey = state.googleApiKey;
@@ -43,6 +44,9 @@ export async function generateReply(context: ConversationContext): Promise<strin
   const useMemory = state.useMemory;
   const memoryApiKey = state.memoryApiKey;
   const memoryProjectId = state.memoryProjectId;
+  const selectedPromptId = state.selectedPromptId;
+
+  console.log("[LLM] Using prompt ID:", selectedPromptId);
 
   const model = getModel(provider, modelName, openRouterApiKey, googleApiKey);
 
@@ -68,14 +72,12 @@ export async function generateReply(context: ConversationContext): Promise<strin
     });
   }
 
-  console.log("Generating reply with prompt content:", userContent);
-
   try {
     const storedReplies = await getStoredReplies();
-    const systemContent = generateSystemPrompt(context.userInstructions, useMemory, storedReplies);
+    const systemContent = generateSystemPrompt(context.userInstructions, useMemory, storedReplies, selectedPromptId);
     let text: string;
 
-
+    console.log(systemContent)
     const result = await generateText({
       model,
       messages: [
