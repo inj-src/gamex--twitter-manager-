@@ -35,6 +35,7 @@ export interface State {
   memoryProjectId?: string;
   useMemory: boolean;
   selectedPromptId?: string;
+  promptCycleHotkey?: string; // Default: 'alt+s'
 }
 
 export const DEFAULT_TARGETS = { tweets: 5, replies: 50 };

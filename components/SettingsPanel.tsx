@@ -20,6 +20,7 @@ import {
   setMemoryApiKey,
   setMemoryProjectId,
   setUseMemory,
+  setPromptCycleHotkey,
 } from "@/lib/storage";
 import type { Provider } from "@/lib/types";
 
@@ -34,6 +35,7 @@ export function SettingsPanel() {
   const [memoryApiKey, setMemoryApiKeyLocal] = useState("");
   const [memoryProjectId, setMemoryProjectIdLocal] = useState("");
   const [useMemory, setUseMemoryLocal] = useState(false);
+  const [promptHotkey, setPromptHotkeyLocal] = useState("alt+s");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -49,6 +51,7 @@ export function SettingsPanel() {
       setMemoryApiKeyLocal(s.memoryApiKey || "");
       setMemoryProjectIdLocal(s.memoryProjectId || "");
       setUseMemoryLocal(s.useMemory || false);
+      setPromptHotkeyLocal(s.promptCycleHotkey || "alt+s");
       setIsLoading(false);
     };
 
@@ -103,6 +106,22 @@ export function SettingsPanel() {
   function onUpdateUseMemory(enabled: boolean) {
     setUseMemoryLocal(enabled);
     setUseMemory(enabled);
+  }
+
+  async function onUpdatePromptHotkey(newHotkey: string) {
+    setPromptHotkeyLocal(newHotkey);
+    await setPromptCycleHotkey(newHotkey);
+    // Notify content scripts of the hotkey change
+    try {
+      const tabs = await browser.tabs.query({});
+      for (const tab of tabs) {
+        if (tab.id && tab.url?.includes("x.com")) {
+          browser.tabs.sendMessage(tab.id, { type: "hotkeyChanged", hotkey: newHotkey }).catch(() => { });
+        }
+      }
+    } catch (e) {
+      // Ignore errors
+    }
   }
 
   if (isLoading) {
@@ -238,6 +257,30 @@ export function SettingsPanel() {
             checked={useImageUnderstanding}
             onCheckedChange={onUpdateUseImageUnderstanding}
           />
+        </div>
+      </div>
+
+      {/* Hotkeys Section */}
+      <div className="space-y-3 bg-secondary/50 p-3 border border-border rounded-xl">
+        <div className="px-1">
+          <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+            Hotkeys
+          </h3>
+        </div>
+        <div className="space-y-1">
+          <label className="text-muted-foreground text-xs">
+            Cycle System Prompt
+          </label>
+          <Input
+            type="text"
+            value={promptHotkey}
+            onChange={(e) => onUpdatePromptHotkey(e.target.value)}
+            className="bg-background border-border h-9"
+            placeholder="alt+s"
+          />
+          <p className="text-muted-foreground text-[10px]">
+            Use format: ctrl+k, alt+s, shift+p, etc.
+          </p>
         </div>
       </div>
     </div>
