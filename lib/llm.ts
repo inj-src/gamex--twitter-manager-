@@ -29,6 +29,7 @@ function getModel(
     if (!openRouterApiKey) {
       throw new Error("OpenRouter API Key not found. Please set it in the extension popup.");
     }
+    console.log({ openRouterApiKey })
     const openRouter = createOpenRouter({ apiKey: openRouterApiKey });
     return openRouter(modelName || DEFAULT_OPENROUTER_MODEL);
   }

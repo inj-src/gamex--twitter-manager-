@@ -1,8 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -10,67 +8,120 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RotateCcw } from "lucide-react";
+import {
+  getState,
+  setTargets,
+  setProvider,
+  setOpenRouterApiKey,
+  setGoogleApiKey,
+  setOpenRouterModel,
+  setGoogleModel,
+  setUseImageUnderstanding,
+  setMemoryApiKey,
+  setMemoryProjectId,
+  setUseMemory,
+} from "@/lib/storage";
 import type { Provider } from "@/lib/types";
-import { SYSTEM_PROMPT_PRESETS } from "@/lib/systemPrompts";
 
-interface SettingsPanelProps {
-  targets: { tweets: number; replies: number };
-  provider: Provider;
-  apiKey: string;
-  googleApiKey: string;
-  openRouterModel: string;
-  googleModel: string;
-  useImageUnderstanding: boolean;
-  memoryApiKey: string;
-  memoryProjectId: string;
-  useMemory: boolean;
-  selectedPrompt: string;
-  onUpdateTargets: (targets: { tweets: number; replies: number }) => void;
-  onUpdateProvider: (provider: Provider) => void;
-  onUpdateApiKey: (key: string) => void;
-  onUpdateGoogleApiKey: (key: string) => void;
-  onUpdateOpenRouterModel: (model: string) => void;
-  onUpdateGoogleModel: (model: string) => void;
-  onUpdateUseImageUnderstanding: (enabled: boolean) => void;
-  onUpdateMemoryApiKey: (key: string) => void;
-  onUpdateMemoryProjectId: (id: string) => void;
-  onUpdateUseMemory: (enabled: boolean) => void;
-  onUpdateSelectedPrompt: (promptId: string) => void;
-  onReset: () => void;
-}
+export function SettingsPanel() {
+  const [targets, setLocalTargets] = useState({ tweets: 5, replies: 50 });
+  const [provider, setProviderLocal] = useState<Provider>("openrouter");
+  const [apiKey, setApiKey] = useState("");
+  const [googleApiKey, setGoogleApiKeyLocal] = useState("");
+  const [openRouterModel, setOpenRouterModelLocal] = useState("");
+  const [googleModel, setGoogleModelLocal] = useState("");
+  const [useImageUnderstanding, setUseImageUnderstandingLocal] = useState(false);
+  const [memoryApiKey, setMemoryApiKeyLocal] = useState("");
+  const [memoryProjectId, setMemoryProjectIdLocal] = useState("");
+  const [useMemory, setUseMemoryLocal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-export function SettingsPanel({
-  targets,
-  provider,
-  apiKey,
-  googleApiKey,
-  openRouterModel,
-  googleModel,
-  useImageUnderstanding,
-  memoryApiKey,
-  memoryProjectId,
-  useMemory,
-  selectedPrompt,
-  onUpdateTargets,
-  onUpdateProvider,
-  onUpdateApiKey,
-  onUpdateGoogleApiKey,
-  onUpdateOpenRouterModel,
-  onUpdateGoogleModel,
-  onUpdateUseImageUnderstanding,
-  onUpdateMemoryApiKey,
-  onUpdateMemoryProjectId,
-  onUpdateUseMemory,
-  onUpdateSelectedPrompt,
-  onReset,
-}: SettingsPanelProps) {
+  useEffect(() => {
+    const loadState = async () => {
+      const s = await getState();
+      setLocalTargets(s.targets || { tweets: 5, replies: 50 });
+      setProviderLocal(s.provider || "openrouter");
+      setApiKey(s.openRouterApiKey || "");
+      setGoogleApiKeyLocal(s.googleApiKey || "");
+      setOpenRouterModelLocal(s.openRouterModel || "");
+      setGoogleModelLocal(s.googleModel || "");
+      setUseImageUnderstandingLocal(s.useImageUnderstanding || false);
+      setMemoryApiKeyLocal(s.memoryApiKey || "");
+      setMemoryProjectIdLocal(s.memoryProjectId || "");
+      setUseMemoryLocal(s.useMemory || false);
+      setIsLoading(false);
+    };
+
+    loadState();
+  }, []);
+
+  function onUpdateTargets(newTargets: { tweets: number; replies: number }) {
+    setLocalTargets(newTargets);
+    setTargets(newTargets.tweets, newTargets.replies);
+  }
+
+  function onUpdateProvider(newProvider: Provider) {
+    setProviderLocal(newProvider);
+    setProvider(newProvider);
+  }
+
+  function onUpdateApiKey(newKey: string) {
+    setApiKey(newKey);
+    setOpenRouterApiKey(newKey);
+  }
+
+  function onUpdateGoogleApiKey(newKey: string) {
+    setGoogleApiKeyLocal(newKey);
+    setGoogleApiKey(newKey);
+  }
+
+  function onUpdateOpenRouterModel(newModel: string) {
+    setOpenRouterModelLocal(newModel);
+    setOpenRouterModel(newModel);
+  }
+
+  function onUpdateGoogleModel(newModel: string) {
+    setGoogleModelLocal(newModel);
+    setGoogleModel(newModel);
+  }
+
+  function onUpdateUseImageUnderstanding(enabled: boolean) {
+    setUseImageUnderstandingLocal(enabled);
+    setUseImageUnderstanding(enabled);
+  }
+
+  function onUpdateMemoryApiKey(newKey: string) {
+    setMemoryApiKeyLocal(newKey);
+    setMemoryApiKey(newKey);
+  }
+
+  function onUpdateMemoryProjectId(newId: string) {
+    setMemoryProjectIdLocal(newId);
+    setMemoryProjectId(newId);
+  }
+
+  function onUpdateUseMemory(enabled: boolean) {
+    setUseMemoryLocal(enabled);
+    setUseMemory(enabled);
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64 text-muted-foreground">
+        Loading...
+      </div>
+    );
+  }
+
   return (
-    <Card className="bg-secondary slide-in-from-top-2 border-border animate-in duration-200 fade-in">
-      <CardHeader className="pb-2">
-        <CardTitle className="font-medium text-muted-foreground text-sm">Targets</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <div className="space-y-4">
+      {/* Targets Section */}
+      <div className="space-y-3 bg-secondary/50 p-3 border border-border rounded-xl">
+        <div className="px-1">
+          <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+            Daily Targets
+          </h3>
+        </div>
         <div className="gap-3 grid grid-cols-2">
           <div className="space-y-1">
             <label className="text-muted-foreground text-xs">Tweets</label>
@@ -80,7 +131,7 @@ export function SettingsPanel({
               onChange={(e) =>
                 onUpdateTargets({ ...targets, tweets: Number(e.target.value) })
               }
-              className="bg-background border-border h-8"
+              className="bg-background border-border h-9"
             />
           </div>
           <div className="space-y-1">
@@ -91,147 +142,104 @@ export function SettingsPanel({
               onChange={(e) =>
                 onUpdateTargets({ ...targets, replies: Number(e.target.value) })
               }
-              className="bg-background border-border h-8"
+              className="bg-background border-border h-9"
             />
           </div>
         </div>
+      </div>
 
-        <Separator className="my-2 bg-border/50" />
-
-        <div className="space-y-3">
-          <h3 className="font-medium text-muted-foreground text-xs">System Prompt</h3>
-          <div className="space-y-1">
-            <label className="text-muted-foreground text-xs">Persona Style</label>
-            <Select value={selectedPrompt} onValueChange={onUpdateSelectedPrompt}>
-              <SelectTrigger className="bg-background border-border h-8 w-full">
-                <SelectValue placeholder="Select persona" />
-              </SelectTrigger>
-              <SelectContent>
-                {SYSTEM_PROMPT_PRESETS.map((preset) => (
-                  <SelectItem key={preset.id} value={preset.id}>
-                    {preset.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      {/* AI Provider Section */}
+      <div className="space-y-3 bg-secondary/50 p-3 border border-border rounded-xl">
+        <div className="px-1">
+          <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+            AI Provider
+          </h3>
         </div>
 
-        <Separator className="my-2 bg-border/50" />
+        <div className="space-y-1">
+          <label className="text-muted-foreground text-xs">Provider</label>
+          <Select
+            value={provider}
+            onValueChange={(value) => onUpdateProvider(value as Provider)}
+          >
+            <SelectTrigger className="bg-background border-border h-9 w-full">
+              <SelectValue placeholder="Select provider" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="openrouter">OpenRouter</SelectItem>
+              <SelectItem value="google">Google AI</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-        <div className="space-y-3">
-          <h3 className="font-medium text-muted-foreground text-xs">AI Provider</h3>
-          <div className="space-y-1">
-            <label className="text-muted-foreground text-xs">Provider</label>
-            <Select value={provider} onValueChange={(value) => onUpdateProvider(value as Provider)}>
-              <SelectTrigger className="bg-background border-border h-8 w-full">
-                <SelectValue placeholder="Select provider" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="openrouter">OpenRouter</SelectItem>
-                <SelectItem value="google">Google AI</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {provider === "openrouter" && (
+        {provider === "openrouter" && (
+          <>
             <div className="space-y-1">
-              <label className="text-muted-foreground text-xs">OpenRouter API Key</label>
+              <label className="text-muted-foreground text-xs">
+                OpenRouter API Key
+              </label>
               <Input
                 type="text"
                 value={apiKey}
                 onChange={(e) => onUpdateApiKey(e.target.value)}
-                className="bg-background border-border h-8"
+                className="bg-background border-border h-9"
                 placeholder="sk-or-..."
               />
             </div>
-          )}
-
-          {provider === "google" && (
             <div className="space-y-1">
-              <label className="text-muted-foreground text-xs">Google API Key</label>
-              <Input
-                type="text"
-                value={googleApiKey}
-                onChange={(e) => onUpdateGoogleApiKey(e.target.value)}
-                className="bg-background border-border h-8"
-                placeholder="AIza..."
-              />
-            </div>
-          )}
-
-          {provider === "openrouter" && (
-            <div className="space-y-1">
-              <label className="text-muted-foreground text-xs">OpenRouter Model</label>
+              <label className="text-muted-foreground text-xs">
+                OpenRouter Model
+              </label>
               <Input
                 type="text"
                 value={openRouterModel}
                 onChange={(e) => onUpdateOpenRouterModel(e.target.value)}
-                className="bg-background border-border h-8"
+                className="bg-background border-border h-9"
                 placeholder="moonshotai/kimi-k2:free"
               />
             </div>
-          )}
+          </>
+        )}
 
-          {provider === "google" && (
+        {provider === "google" && (
+          <>
             <div className="space-y-1">
-              <label className="text-muted-foreground text-xs">Google Model</label>
+              <label className="text-muted-foreground text-xs">
+                Google API Key
+              </label>
+              <Input
+                type="text"
+                value={googleApiKey}
+                onChange={(e) => onUpdateGoogleApiKey(e.target.value)}
+                className="bg-background border-border h-9"
+                placeholder="AIza..."
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-muted-foreground text-xs">
+                Google Model
+              </label>
               <Input
                 type="text"
                 value={googleModel}
                 onChange={(e) => onUpdateGoogleModel(e.target.value)}
-                className="bg-background border-border h-8"
+                className="bg-background border-border h-9"
                 placeholder="gemini-3-flash-preview"
               />
             </div>
-          )}
-          <div className="flex justify-between items-center">
-            <label className="text-muted-foreground text-xs">Image Understanding</label>
-            <Switch
-              checked={useImageUnderstanding}
-              onCheckedChange={onUpdateUseImageUnderstanding}
-            />
-          </div>
-        </div>
+          </>
+        )}
 
-        {/* <Separator className="my-2 bg-border/50" /> */}
-        {/* <div className="space-y-2">
-          <h3 className="font-medium text-muted-foreground text-xs">Memory</h3>
-          <div className="space-y-1">
-            <label className="text-muted-foreground text-xs">Memory API Key</label>
-            <Input
-              type="password"
-              value={memoryApiKey}
-              onChange={(e) => onUpdateMemoryApiKey(e.target.value)}
-              className="bg-background border-border h-8"
-              placeholder="Supermemory API Key"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-muted-foreground text-xs">Project ID</label>
-            <Input
-              type="text"
-              value={memoryProjectId}
-              onChange={(e) => onUpdateMemoryProjectId(e.target.value)}
-              className="bg-background border-border h-8"
-              placeholder="Project ID (Optional)"
-            />
-          </div>
-          <div className="flex justify-between items-center">
-            <label className="text-muted-foreground text-xs">Enable Memory</label>
-            <Switch checked={useMemory} onCheckedChange={onUpdateUseMemory} />
-          </div>
-        </div> */}
-        <Button
-          variant="destructive"
-          size="sm"
-          className="mt-2 w-full h-8 text-xs"
-          onClick={onReset}
-        >
-          <RotateCcw className="mr-2 w-3 h-3" />
-          Reset Today's Data
-        </Button>
-      </CardContent>
-    </Card>
+        <div className="flex justify-between items-center py-1">
+          <label className="text-muted-foreground text-xs">
+            Image Understanding
+          </label>
+          <Switch
+            checked={useImageUnderstanding}
+            onCheckedChange={onUpdateUseImageUnderstanding}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

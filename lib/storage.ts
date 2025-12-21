@@ -258,3 +258,13 @@ export async function getStoredReplies(): Promise<StoredReply[]> {
   console.log(`[DEBUG][Storage] getStoredReplies() returning ${replies?.length || 0} replies`);
   return replies || [];
 }
+
+export async function setStoredReplies(replies: StoredReply[]): Promise<void> {
+  await setStorageItem(STORED_REPLIES_KEY, replies);
+}
+
+export async function deleteStoredReply(id: string): Promise<void> {
+  const replies = await getStoredReplies();
+  const filtered = replies.filter((r) => r.id !== id);
+  await setStoredReplies(filtered);
+}

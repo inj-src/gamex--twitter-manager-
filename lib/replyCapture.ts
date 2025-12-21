@@ -37,7 +37,6 @@ export async function captureReply(
     ...(type === "ai-modified" && { aiGeneratedReply }),
   };
 
-  console.log("Capturing reply:", storedReply);
   await addStoredReply(storedReply);
 }
 
