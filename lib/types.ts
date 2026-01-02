@@ -17,6 +17,7 @@ export interface StoredReply {
   reply: string; // The actual reply sent
   type: "manual" | "ai-unmodified" | "ai-modified";
   aiGeneratedReply?: string; // Original AI reply (for modified type)
+  promptId?: string; // System prompt ID used for AI-generated replies (e.g. "sigma-ragebait")
 }
 
 export type Provider = 'openrouter' | 'google';

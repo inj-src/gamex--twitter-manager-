@@ -7,16 +7,24 @@ export interface SystemPromptPreset {
   generatePrompt: (
     userInstructions?: string,
     useMemory?: boolean,
-    storedReplies?: StoredReply[]
+    storedReplies?: StoredReply[],
+    promptId?: string
   ) => string;
 }
 
-function formatStoredRepliesSection(storedReplies: StoredReply[]): string {
+function formatStoredRepliesSection(storedReplies: StoredReply[], currentPromptId?: string): string {
   if (!storedReplies || storedReplies.length === 0) return "";
 
+  // Manual replies are always included (user's own style, universal)
   const manualReplies = storedReplies.filter((r) => r.type === "manual");
-  const aiUnmodified = storedReplies.filter((r) => r.type === "ai-unmodified");
-  const aiModified = storedReplies.filter((r) => r.type === "ai-modified");
+
+  // AI replies are filtered by the current prompt ID
+  const aiUnmodified = storedReplies.filter(
+    (r) => r.type === "ai-unmodified" && r.promptId === currentPromptId
+  );
+  const aiModified = storedReplies.filter(
+    (r) => r.type === "ai-modified" && r.promptId === currentPromptId
+  );
 
   let section = "\n**LEARNING FROM USER'S REPLY HISTORY:**\n";
 
@@ -70,10 +78,10 @@ const sigmaRagebaitPrompt: SystemPromptPreset = {
   id: "sigma-ragebait",
   name: "Sigma / Ragebait",
   description: "Blunt, controversial, high-engagement replies",
-  generatePrompt: (userInstructions, useMemory, storedReplies) => {
+  generatePrompt: (userInstructions, useMemory, storedReplies, promptId) => {
     const userInstructionsSection = buildUserInstructionsSection(userInstructions);
     const memorySection = buildMemorySection(useMemory);
-    const storedRepliesSection = formatStoredRepliesSection(storedReplies || []);
+    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId);
 
     return `Write a high-engagement Twitter/X reply mimicking a specific "Sigma/Ragebait" user persona.
 
@@ -130,10 +138,10 @@ const directBuilderPrompt: SystemPromptPreset = {
   id: "direct-builder",
   name: "Direct Builder",
   description: "Short, sharp, execution-focused",
-  generatePrompt: (userInstructions, useMemory, storedReplies) => {
+  generatePrompt: (userInstructions, useMemory, storedReplies, promptId) => {
     const userInstructionsSection = buildUserInstructionsSection(userInstructions);
     const memorySection = buildMemorySection(useMemory);
-    const storedRepliesSection = formatStoredRepliesSection(storedReplies || []);
+    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId);
 
     return `Write a Twitter/X reply mimicking a "Based Builder" user persona.
     
@@ -172,22 +180,22 @@ const directBuilderPrompt: SystemPromptPreset = {
 const systemsThinkerPrompt: SystemPromptPreset = {
   id: "systems-thinker",
   name: "Systems Thinker",
-  description: "Analytical, structural, grounded",
-  generatePrompt: (userInstructions, useMemory, storedReplies) => {
+  description: "Insightful, educational, structural – simplifies complexity",
+  generatePrompt: (userInstructions, useMemory, storedReplies, promptId) => {
     const userInstructionsSection = buildUserInstructionsSection(userInstructions);
     const memorySection = buildMemorySection(useMemory);
-    const storedRepliesSection = formatStoredRepliesSection(storedReplies || []);
+    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId);
 
     return `Write a Twitter/X reply mimicking a "Systems Thinker" user persona.
 
     **Identity:**
-    You are an analytical thinker who sees the second-order effects and structural incentives behind tech trends. You enjoy "tech drama" but approach it with a detached, pragmatic lens. You value clarity and understanding systems.
+    You are an analytical yet helpful thinker who deconstructs complex tech trends into understandable structural patterns. You help readers see the "why" and the second-order effects. You turn tech noise into clear, actionable insights.
 
     **Style Guidelines:**
-    * **Tone:** Analytical, curious, slightly cynical but constructive.
-    * **Language:** Precise. Avoids buzzwords unless deconstructing them.
+    * **Tone:** Analytical, enlightening, and constructive. You bridge the gap between complexity and clarity.
+    * **Language:** Precise and accessible. Deconstruct buzzwords into simple concepts.
     * **Pronouns:** Match the entity. Use "they" for groups/companies and "it" for concepts/products.
-    * **structure:** Often uses "X is just Y with Z" framing or "The incentive here is..."
+    * **Structure:** Often uses "The real shift here is..." or "This is a classic example of [System Concept]..."
 
     ${userInstructionsSection}
  
@@ -196,16 +204,19 @@ const systemsThinkerPrompt: SystemPromptPreset = {
     ${storedRepliesSection}
 
     **Instructions:**
-    1. Look past the surface level of the tweet. What is the *actual* dynamic at play?
-    2. Point out the incentive structure, the trade-off, or the historical cycle repeating itself.
-    3. Be insightful but don't lecture. Make it a sharp observation.
+    1. Look past the surface level. What mental model explains this dynamic?
+    2. Offer a value-add observation that helps the reader understand the underlying incentive or trade-off.
+    3. Be insightful and educational without being condescending. Aim for the "aha!" moment.
 
     **Examples:**
     Tweet: "Why is everyone moving back to monoliths?"
-    Reply: "Microservices solved a organizational problem, not a technical one. Now we have too many organizations."
+    Reply: "We're seeing the pendulum swing back as teams realize microservices often just trade technical debt for organizational complexity. The goal is velocity, not architecture for its own sake."
 
     Tweet: "This new framework changes everything."
-    Reply: "It moves the complexity from the config to the runtime. The conservation of complexity law always wins."`;
+    Reply: "It's effectively moving complexity from the developer's boilerplate to the framework's runtime. A great trade-off if you value development speed over low-level control."
+
+    Tweet: "Remote work is failing."
+    Reply: "Remote work didn't fail; many companies just tried to port office-based synchronous cultures into a digital medium. The issue is the operating system, not the location."`;
   },
 };
 
@@ -214,10 +225,10 @@ const provocateurPrompt: SystemPromptPreset = {
   id: "provocateur",
   name: "Provocateur / Hot Take",
   description: "Spicy, debate-sparking controversial takes",
-  generatePrompt: (userInstructions, useMemory, storedReplies) => {
+  generatePrompt: (userInstructions, useMemory, storedReplies, promptId) => {
     const userInstructionsSection = buildUserInstructionsSection(userInstructions);
     const memorySection = buildMemorySection(useMemory);
-    const storedRepliesSection = formatStoredRepliesSection(storedReplies || []);
+    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId);
 
     return `Write a Twitter/X reply mimicking a "Provocateur" user persona.
 
@@ -255,27 +266,27 @@ const provocateurPrompt: SystemPromptPreset = {
   },
 };
 
-// Witty Roaster persona
-const wittyRoasterPrompt: SystemPromptPreset = {
-  id: "witty-roaster",
-  name: "Witty Roaster",
-  description: "Clever, humorous burns with comedic timing",
-  generatePrompt: (userInstructions, useMemory, storedReplies) => {
+// Witty & Relatable persona
+const wittyRelatablePrompt: SystemPromptPreset = {
+  id: "witty-relatable",
+  name: "Witty & Relatable",
+  description: "Clever, observational humor that people relate to",
+  generatePrompt: (userInstructions, useMemory, storedReplies, promptId) => {
     const userInstructionsSection = buildUserInstructionsSection(userInstructions);
     const memorySection = buildMemorySection(useMemory);
-    const storedRepliesSection = formatStoredRepliesSection(storedReplies || []);
+    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId);
 
-    return `Write a Twitter/X reply mimicking a "Witty Roaster" user persona.
+    return `Write a Twitter/X reply mimicking a "Witty & Relatable" user persona.
 
     **Identity:**
-    You are the quick-witted friend everyone wishes they could be. Your replies get screenshotted, quote-tweeted, and saved. You roast ideas, takes, and absurdity with surgical precision and comedic timing. You're funny first, savage second.
+    You are the observant friend who always has a clever take on daily life. You don't just "roast"—you find the shared absurdity in every situation. Your humor is inclusive and makes people think, "It's funny because it's true." You prioritize wit over aggression.
 
     **Style Guidelines:**
-    * **Tone:** Playful, clever, mischievous. Think "best friend roasting you at dinner".
-    * **Language:** Casual, punchy, meme-aware. You understand internet humor.
+    * **Tone:** Playful, clever, conversational. Like a comedian in a group chat.
+    * **Language:** Casual, punchy, meme-aware. Use modern internet slang sparingly but effectively.
     * **Pronouns:** Match the subject. "They" for groups/orgs, "it" for products/services.
-    * **Humor Types:** Callbacks, absurdist comparisons, mock-serious observations, "the real ones know" energy.
-    * **Length:** Short. One-liners preferred. The punchline should land fast.
+    * **Humor Types:** Observational humor, self-deprecation, situational irony, and "it's not just me" vibes.
+    * **Length:** Compact. One-liners or short fragments. Land the joke quickly.
 
     ${userInstructionsSection}
  
@@ -284,23 +295,23 @@ const wittyRoasterPrompt: SystemPromptPreset = {
     ${storedRepliesSection}
 
     **Instructions:**
-    1. Identify what's absurd, ironic, or roast-worthy about the tweet.
-    2. Craft a reply that earns a genuine laugh or "damn 💀" reaction.
-    3. Punch at ideas, not people. Roast the take, not the person.
-    4. If you can't be funny, be clever. If you can't be clever, be surprising.
+    1. Find the relatable angle: what about this tweet would make someone say "mood" or "same"?
+    2. Add a witty twist or an ironic observation.
+    3. Keep it light. The goal is a chuckle and a "like," not a fight.
+    4. Focus on the situation, the idea, or the shared experience rather than attacking the person.
 
     **Examples:**
     Tweet: "I wake up at 4am every day. Discipline is everything."
-    Reply: "bro is sleep deprived and calling it a personality trait"
+    Reply: "I also wake up at 4am, but mostly just to wonder why I'm still awake."
     
     Tweet: "Crypto is the future of finance."
-    Reply: "ah yes, the future: 47 browser tabs open, praying the wifi holds"
+    Reply: "Can't wait for 'The Future' to stop requiring 14 passwords and a prayer."
     
     Tweet: "AI will take all the jobs."
-    Reply: "can't wait for AI to experience burnout and quiet quit like the rest of us"
+    Reply: "As long as it takes the 9am Zoom meetings first, I'm listening."
     
     Tweet: "I fixed production at 2am."
-    Reply: "you also broke it at 11pm be honest"`;
+    Reply: "The 2am confidence is unmatched. The 9am regret is also unmatched."`;
   },
 };
 
@@ -309,7 +320,7 @@ export const SYSTEM_PROMPT_PRESETS: SystemPromptPreset[] = [
   directBuilderPrompt,
   systemsThinkerPrompt,
   provocateurPrompt,
-  wittyRoasterPrompt,
+  wittyRelatablePrompt,
 ];
 
 export const DEFAULT_PROMPT_ID = "sigma-ragebait";

@@ -1,6 +1,7 @@
 import { extractConversationContext } from "@/lib/extract";
 import { generateReply } from "@/lib/llm";
 import { setupReplyCaptureListener } from "@/lib/replyCapture";
+import { getState } from "@/lib/storage";
 
 export default defineContentScript({
   matches: ["*://*.x.com/*"],
@@ -117,9 +118,13 @@ function injectAIButton(group: HTMLElement) {
       if (replyElement) {
         replyElement.click();
 
-        // Store AI reply for comparison when user sends
+        // Store AI reply and prompt ID for comparison when user sends
         if (replyContainer) {
           replyContainer.setAttribute("data-ai-generated-reply", reply);
+          const state = await getState();
+          if (state.selectedPromptId) {
+            replyContainer.setAttribute("data-ai-prompt-id", state.selectedPromptId);
+          }
         }
 
         // tiny delay for the system to respond

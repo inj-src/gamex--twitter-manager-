@@ -235,7 +235,7 @@ export function StoredRepliesPanel() {
             </div>
          ) : (
             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-               {replies.map((reply) => (
+                  {replies.reverse().map((reply) => (
                   <div
                      key={reply.id}
                      className="group bg-secondary/50 hover:bg-secondary/60 p-3 border border-border/50 hover:border-border rounded-lg transition-colors"

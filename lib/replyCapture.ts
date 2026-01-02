@@ -9,7 +9,8 @@ import { extractTweetData, TweetContent } from "./extract";
 export async function captureReply(
   originalTweet: TweetContent,
   reply: string,
-  aiGeneratedReply?: string
+  aiGeneratedReply?: string,
+  promptId?: string
 ): Promise<void> {
   // Determine the reply type
   let type: StoredReply["type"];
@@ -35,6 +36,7 @@ export async function captureReply(
     reply,
     type,
     ...(type === "ai-modified" && { aiGeneratedReply }),
+    ...(type !== "manual" && promptId && { promptId }),
   };
 
   await addStoredReply(storedReply);
@@ -88,6 +90,7 @@ export function setupReplyCaptureListener(): void {
 
       // Get the AI generated reply if it exists
       const aiGeneratedReply = replyContainer.getAttribute("data-ai-generated-reply") || undefined;
+      const promptId = replyContainer.getAttribute("data-ai-prompt-id") || undefined;
 
       // Extract the reply text
       const replyText = extractReplyText();
@@ -104,10 +107,11 @@ export function setupReplyCaptureListener(): void {
       }
 
       // Capture the reply
-      await captureReply(originalTweet, replyText, aiGeneratedReply);
+      await captureReply(originalTweet, replyText, aiGeneratedReply, promptId);
 
-      // Clear the AI generated reply attribute after capturing
+      // Clear the AI generated reply attributes after capturing
       replyContainer.removeAttribute("data-ai-generated-reply");
+      replyContainer.removeAttribute("data-ai-prompt-id");
     },
     true // Use capture phase to run before Twitter's handlers
   );
