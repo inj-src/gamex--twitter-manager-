@@ -56,6 +56,7 @@ export async function generateReply(context: ConversationContext): Promise<strin
   const memoryApiKey = state.memoryApiKey;
   const memoryProjectId = state.memoryProjectId;
   const selectedPromptId = state.selectedPromptId;
+  const injectInSystemPrompts = state.injectInSystemPrompts;
 
   console.log("[DEBUG] Configuration:", {
     provider,
@@ -98,7 +99,7 @@ export async function generateReply(context: ConversationContext): Promise<strin
 
     console.log("[DEBUG] Step 3: Generating system prompt...");
     const promptStartTime = performance.now();
-    const systemContent = generateSystemPrompt(context.userInstructions, useMemory, storedReplies, selectedPromptId);
+    const systemContent = generateSystemPrompt(context.userInstructions, useMemory, storedReplies, selectedPromptId, injectInSystemPrompts);
     console.log(`[DEBUG] Step 3 COMPLETE: System prompt generated in ${(performance.now() - promptStartTime).toFixed(2)}ms`);
     console.log(`[DEBUG] System prompt length: ${systemContent.length} chars`);
 

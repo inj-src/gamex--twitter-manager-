@@ -5,11 +5,12 @@ export function generateSystemPrompt(
   userInstructions?: string,
   useMemory?: boolean,
   storedReplies?: StoredReply[],
-  promptId?: string
+  promptId?: string,
+  injectInSystemPrompts?: boolean
 ): string {
   const preset = getPromptOrDefault(promptId);
   console.log("[PromptBuilder] Selected preset:", preset.name);
-  const prompt = preset.generatePrompt(userInstructions, useMemory, storedReplies, promptId);
+  const prompt = preset.generatePrompt(userInstructions, useMemory, storedReplies, promptId, injectInSystemPrompts);
   return prompt;
 }
 

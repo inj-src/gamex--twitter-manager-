@@ -25,6 +25,8 @@ const DEFAULT_STATE: State = {
   openRouterModel: "moonshotai/kimi-k2:free",
   googleModel: "gemini-3-flash-preview",
   promptCycleHotkey: "alt+s",
+  captureReplies: true,
+  injectInSystemPrompts: true,
 };
 
 async function getStorageItem<T>(key: string): Promise<T | undefined> {
@@ -242,6 +244,18 @@ export async function setSelectedPromptId(promptId: string): Promise<void> {
 export async function setPromptCycleHotkey(hotkey: string): Promise<void> {
   const state = await getState();
   state.promptCycleHotkey = hotkey;
+  await setState(state);
+}
+
+export async function setCaptureReplies(captureReplies: boolean): Promise<void> {
+  const state = await getState();
+  state.captureReplies = captureReplies;
+  await setState(state);
+}
+
+export async function setInjectInSystemPrompts(injectInSystemPrompts: boolean): Promise<void> {
+  const state = await getState();
+  state.injectInSystemPrompts = injectInSystemPrompts;
   await setState(state);
 }
 

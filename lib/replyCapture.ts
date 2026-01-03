@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { addStoredReply } from "./storage";
+import { addStoredReply, getState } from "./storage";
 import type { StoredReply } from "./types";
 import { extractTweetData, TweetContent } from "./extract";
 
@@ -12,6 +12,13 @@ export async function captureReply(
   aiGeneratedReply?: string,
   promptId?: string
 ): Promise<void> {
+  // Check if reply capture is disabled
+  const state = await getState();
+  if (!state.captureReplies) {
+    console.log("[ReplyCapture] Reply capture is disabled, skipping");
+    return;
+  }
+
   // Determine the reply type
   let type: StoredReply["type"];
 

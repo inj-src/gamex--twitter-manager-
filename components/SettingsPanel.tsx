@@ -21,6 +21,8 @@ import {
   setMemoryProjectId,
   setUseMemory,
   setPromptCycleHotkey,
+  setCaptureReplies,
+  setInjectInSystemPrompts,
 } from "@/lib/storage";
 import type { Provider } from "@/lib/types";
 
@@ -36,6 +38,8 @@ export function SettingsPanel() {
   const [memoryProjectId, setMemoryProjectIdLocal] = useState("");
   const [useMemory, setUseMemoryLocal] = useState(false);
   const [promptHotkey, setPromptHotkeyLocal] = useState("alt+s");
+  const [captureReplies, setCaptureRepliesLocal] = useState(true);
+  const [injectInSystemPrompts, setInjectInSystemPromptsLocal] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -52,6 +56,8 @@ export function SettingsPanel() {
       setMemoryProjectIdLocal(s.memoryProjectId || "");
       setUseMemoryLocal(s.useMemory || false);
       setPromptHotkeyLocal(s.promptCycleHotkey || "alt+s");
+      setCaptureRepliesLocal(s.captureReplies ?? true);
+      setInjectInSystemPromptsLocal(s.injectInSystemPrompts ?? true);
       setIsLoading(false);
     };
 
@@ -122,6 +128,16 @@ export function SettingsPanel() {
     } catch (e) {
       // Ignore errors
     }
+  }
+
+  function onUpdateCaptureReplies(enabled: boolean) {
+    setCaptureRepliesLocal(enabled);
+    setCaptureReplies(enabled);
+  }
+
+  function onUpdateInjectInSystemPrompts(enabled: boolean) {
+    setInjectInSystemPromptsLocal(enabled);
+    setInjectInSystemPrompts(enabled);
   }
 
   if (isLoading) {
@@ -281,6 +297,33 @@ export function SettingsPanel() {
           <p className="text-muted-foreground text-[10px]">
             Use format: ctrl+k, alt+s, shift+p, etc.
           </p>
+        </div>
+      </div>
+
+      {/* Stored Replies Section */}
+      <div className="space-y-3 bg-secondary/50 p-3 border border-border rounded-xl">
+        <div className="px-1">
+          <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+            Stored Replies
+          </h3>
+        </div>
+        <div className="flex justify-between items-center py-1">
+          <label className="text-muted-foreground text-xs">
+            Capture Replies
+          </label>
+          <Switch
+            checked={captureReplies}
+            onCheckedChange={onUpdateCaptureReplies}
+          />
+        </div>
+        <div className="flex justify-between items-center py-1">
+          <label className="text-muted-foreground text-xs">
+            Inject in System Prompts
+          </label>
+          <Switch
+            checked={injectInSystemPrompts}
+            onCheckedChange={onUpdateInjectInSystemPrompts}
+          />
         </div>
       </div>
     </div>

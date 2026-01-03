@@ -8,11 +8,14 @@ export interface SystemPromptPreset {
     userInstructions?: string,
     useMemory?: boolean,
     storedReplies?: StoredReply[],
-    promptId?: string
+    promptId?: string,
+    injectInSystemPrompts?: boolean
   ) => string;
 }
 
-function formatStoredRepliesSection(storedReplies: StoredReply[], currentPromptId?: string): string {
+function formatStoredRepliesSection(storedReplies: StoredReply[], currentPromptId?: string, injectInSystemPrompts?: boolean): string {
+  // If injection is disabled, return empty string
+  if (injectInSystemPrompts === false) return "";
   if (!storedReplies || storedReplies.length === 0) return "";
 
   // Manual replies are always included (user's own style, universal)
@@ -78,10 +81,10 @@ const sigmaRagebaitPrompt: SystemPromptPreset = {
   id: "sigma-ragebait",
   name: "Sigma / Ragebait",
   description: "Blunt, controversial, high-engagement replies",
-  generatePrompt: (userInstructions, useMemory, storedReplies, promptId) => {
+  generatePrompt: (userInstructions, useMemory, storedReplies, promptId, injectInSystemPrompts) => {
     const userInstructionsSection = buildUserInstructionsSection(userInstructions);
     const memorySection = buildMemorySection(useMemory);
-    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId);
+    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId, injectInSystemPrompts);
 
     return `Write a high-engagement Twitter/X reply mimicking a specific "Sigma/Ragebait" user persona.
 
@@ -138,10 +141,10 @@ const directBuilderPrompt: SystemPromptPreset = {
   id: "direct-builder",
   name: "Direct Builder",
   description: "Short, sharp, execution-focused",
-  generatePrompt: (userInstructions, useMemory, storedReplies, promptId) => {
+  generatePrompt: (userInstructions, useMemory, storedReplies, promptId, injectInSystemPrompts) => {
     const userInstructionsSection = buildUserInstructionsSection(userInstructions);
     const memorySection = buildMemorySection(useMemory);
-    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId);
+    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId, injectInSystemPrompts);
 
     return `Write a Twitter/X reply mimicking a "Based Builder" user persona.
     
@@ -181,10 +184,10 @@ const systemsThinkerPrompt: SystemPromptPreset = {
   id: "systems-thinker",
   name: "Systems Thinker",
   description: "Insightful, educational, structural – simplifies complexity",
-  generatePrompt: (userInstructions, useMemory, storedReplies, promptId) => {
+  generatePrompt: (userInstructions, useMemory, storedReplies, promptId, injectInSystemPrompts) => {
     const userInstructionsSection = buildUserInstructionsSection(userInstructions);
     const memorySection = buildMemorySection(useMemory);
-    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId);
+    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId, injectInSystemPrompts);
 
     return `Write a Twitter/X reply mimicking a "Systems Thinker" user persona.
 
@@ -225,10 +228,10 @@ const provocateurPrompt: SystemPromptPreset = {
   id: "provocateur",
   name: "Provocateur / Hot Take",
   description: "Spicy, debate-sparking controversial takes",
-  generatePrompt: (userInstructions, useMemory, storedReplies, promptId) => {
+  generatePrompt: (userInstructions, useMemory, storedReplies, promptId, injectInSystemPrompts) => {
     const userInstructionsSection = buildUserInstructionsSection(userInstructions);
     const memorySection = buildMemorySection(useMemory);
-    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId);
+    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId, injectInSystemPrompts);
 
     return `Write a Twitter/X reply mimicking a "Provocateur" user persona.
 
@@ -271,10 +274,10 @@ const wittyRelatablePrompt: SystemPromptPreset = {
   id: "witty-relatable",
   name: "Witty & Relatable",
   description: "Clever, observational humor that people relate to",
-  generatePrompt: (userInstructions, useMemory, storedReplies, promptId) => {
+  generatePrompt: (userInstructions, useMemory, storedReplies, promptId, injectInSystemPrompts) => {
     const userInstructionsSection = buildUserInstructionsSection(userInstructions);
     const memorySection = buildMemorySection(useMemory);
-    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId);
+    const storedRepliesSection = formatStoredRepliesSection(storedReplies || [], promptId, injectInSystemPrompts);
 
     return `Write a Twitter/X reply mimicking a "Witty & Relatable" user persona.
 

@@ -37,6 +37,8 @@ export interface State {
   useMemory: boolean;
   selectedPromptId?: string;
   promptCycleHotkey?: string; // Default: 'alt+s'
+  captureReplies: boolean; // Enable/disable capturing replies to storage
+  injectInSystemPrompts: boolean; // Enable/disable injecting stored replies in system prompts
 }
 
 export const DEFAULT_TARGETS = { tweets: 5, replies: 50 };
