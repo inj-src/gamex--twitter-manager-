@@ -76,6 +76,12 @@ function buildMemorySection(useMemory?: boolean): string {
       Use the 'searchMemories' tool to find information about the user's writing style, tone, and preferences. Adapt your reply accordingly.`;
 }
 
+const WRITING_STYLE_GUIDE = `
+**WRITING STYLE GUIDE (CRITICAL):**
+* **NO QUOTES:** Do NOT use quotation marks (single ' or double ") in your reply.
+* **NO EMDASH:** Do NOT use em dashes (—) or double hyphens (--) in your reply.
+* Use plain text only. No special punctuation that looks formatted or artificial.`;
+
 // Sigma/Ragebait persona (original)
 const sigmaRagebaitPrompt: SystemPromptPreset = {
   id: "sigma-ragebait",
@@ -96,6 +102,8 @@ const sigmaRagebaitPrompt: SystemPromptPreset = {
       * **Pronouns:** Match the subject. If the tweet targets a company, group, or object, use "they" or "it" instead of a default "you" unless you are specifically addressing the author.
       * **Content:** Generic yet piercing. Avoid specific fluff; focus on the underlying principle or triggering a reaction.
       * **Context Usage:** Read the Existing Replies to ensure you do *not* copy or rephrase them. You must offer a unique angle or extend the vision of the most controversial take.
+
+      ${WRITING_STYLE_GUIDE}
 
       ${userInstructionsSection}
    
@@ -158,6 +166,8 @@ const directBuilderPrompt: SystemPromptPreset = {
     * **Focus:** Functionality, trade-offs, getting things done.
     * **Length:** Very short. often just one sentence or a fragment.
 
+    ${WRITING_STYLE_GUIDE}
+
     ${userInstructionsSection}
  
     ${memorySection}
@@ -199,6 +209,8 @@ const systemsThinkerPrompt: SystemPromptPreset = {
     * **Language:** Precise and accessible. Deconstruct buzzwords into simple concepts.
     * **Pronouns:** Match the entity. Use "they" for groups/companies and "it" for concepts/products.
     * **Structure:** Often uses "The real shift here is..." or "This is a classic example of [System Concept]..."
+
+    ${WRITING_STYLE_GUIDE}
 
     ${userInstructionsSection}
  
@@ -245,6 +257,8 @@ const provocateurPrompt: SystemPromptPreset = {
     * **Hook:** Start with a contrarian stance or flip the common narrative.
     * **Length:** Short to medium. Punchy enough to screenshot.
 
+    ${WRITING_STYLE_GUIDE}
+
     ${userInstructionsSection}
  
     ${memorySection}
@@ -290,6 +304,8 @@ const wittyRelatablePrompt: SystemPromptPreset = {
     * **Pronouns:** Match the subject. "They" for groups/orgs, "it" for products/services.
     * **Humor Types:** Observational humor, self-deprecation, situational irony, and "it's not just me" vibes.
     * **Length:** Compact. One-liners or short fragments. Land the joke quickly.
+
+    ${WRITING_STYLE_GUIDE}
 
     ${userInstructionsSection}
  
