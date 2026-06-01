@@ -65,7 +65,7 @@ npm run compile
 3. Enable **Developer mode**.
 4. Click **Load unpacked**.
 5. Select:  
-   `/tmp/workspace/inj-src/gamex--twitter-manager-/.output/chrome-mv3`
+   `<project-root>/.output/chrome-mv3`
 
 ## Usage
 
