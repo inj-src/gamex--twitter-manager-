@@ -1,4 +1,4 @@
-# GameX Twitter Manager
+# Twitter Activity & AI Reply Manager (GameX)
 
 Browser extension for **X/Twitter** that tracks posting activity and helps generate context-aware AI replies directly in the tweet UI.
 
@@ -58,14 +58,14 @@ Type check:
 npm run compile
 ```
 
-## Load extension in Chrome
+## Load extension in Chrome (production build)
 
 1. Build once with `npm run build`.
 2. Open `chrome://extensions`.
 3. Enable **Developer mode**.
 4. Click **Load unpacked**.
-5. Select:  
-   `<project-root>/.output/chrome-mv3`
+5. Select the build folder: `.output/chrome-mv3` inside your local project directory  
+   (example project root: `/Users/username/projects/gamex-twitter-manager`)
 
 ## Usage
 
